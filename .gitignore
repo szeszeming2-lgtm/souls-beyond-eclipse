@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Build outputs (keep the folder itself)
+builds/*
+!builds/.gitkeep
+
+# Roblox
+roblox-game/Packages/
+roblox-game/ServerPackages/
+roblox-game/DevPackages/
+roblox-game/sourcemap.json
+*.rbxl.lock
+*.rbxlx.lock
+
+# Editors
+.idea/
+*.swp
+
+# Godot (PC edition, later)
+pc-game/.godot/
+pc-game/export/
