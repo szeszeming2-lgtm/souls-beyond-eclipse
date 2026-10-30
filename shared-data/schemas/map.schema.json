@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One playable map: blockout geometry plus every point of interest. Units are Roblox studs, y is up.",
+  "type": "object",
+  "required": ["$schema", "version", "id", "region_id", "name", "environment_asset", "units", "bounds", "player_spawn", "hubs", "fast_travel", "landmarks", "routes", "spawn_zones", "boss_arenas", "secrets", "side_quest_ids", "blockout", "dev_status"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "id": { "$ref": "common.schema.json#/$defs/map_id" },
+    "region_id": { "$ref": "common.schema.json#/$defs/region_ref" },
+    "name": { "$ref": "common.schema.json#/$defs/name" },
+    "environment_asset": { "$ref": "common.schema.json#/$defs/asset_ref", "description": "The art for this map (currently a placeholder blockout)." },
+    "units": { "const": "studs" },
+    "bounds": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "$ref": "common.schema.json#/$defs/vec3" },
+        "max": { "$ref": "common.schema.json#/$defs/vec3" }
+      }
+    },
+    "player_spawn": {
+      "type": "object",
+      "required": ["position", "facing_deg"],
+      "additionalProperties": false,
+      "properties": {
+        "position": { "$ref": "common.schema.json#/$defs/vec3" },
+        "facing_deg": { "type": "number", "minimum": 0, "exclusiveMaximum": 360 }
+      }
+    },
+    "hubs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "position", "radius_studs", "services"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/hub_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "radius_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
+          "services": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": ["shop", "upgrade", "quest_board", "training", "fast_travel", "save_point", "appearance", "respec"] }
+          }
+        }
+      }
+    },
+    "fast_travel": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "position", "unlocked_by"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/fast_travel_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "unlocked_by": { "enum": ["default", "discover", "story"] }
+        }
+      }
+    },
+    "landmarks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "position", "size", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/landmark_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "size": { "$ref": "common.schema.json#/$defs/vec3" },
+          "description": { "$ref": "common.schema.json#/$defs/short_text" }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "from", "to", "waypoints", "width_studs"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/local_id" },
+          "kind": { "enum": ["street", "alley", "rooftop", "waterfront", "bridge", "interior", "trail"] },
+          "from": { "$ref": "common.schema.json#/$defs/place_ref" },
+          "to": { "$ref": "common.schema.json#/$defs/place_ref" },
+          "waypoints": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/vec3" } },
+          "width_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 200 }
+        }
+      }
+    },
+    "spawn_zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "center", "radius_studs", "enemy_ids", "level_range", "max_alive", "respawn_s"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/spawn_zone_id" },
+          "center": { "$ref": "common.schema.json#/$defs/vec3" },
+          "radius_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
+          "enemy_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/enemy_ref" } },
+          "level_range": { "$ref": "common.schema.json#/$defs/level_range" },
+          "max_alive": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "respawn_s": { "type": "number", "minimum": 5, "maximum": 3600 }
+        }
+      }
+    },
+    "boss_arenas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "boss_id", "center", "radius_studs", "checkpoint_position"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/arena_id" },
+          "boss_id": { "$ref": "common.schema.json#/$defs/enemy_ref" },
+          "center": { "$ref": "common.schema.json#/$defs/vec3" },
+          "radius_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
+          "checkpoint_position": { "$ref": "common.schema.json#/$defs/vec3" }
+        }
+      }
+    },
+    "secrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "position", "hint"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/secret_id" },
+          "kind": { "enum": ["collectible", "codex_entry", "hidden_chest", "lore_note", "challenge", "viewpoint"] },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "hint": { "$ref": "common.schema.json#/$defs/short_text" },
+          "reward": { "$ref": "common.schema.json#/$defs/reward" }
+        }
+      }
+    },
+    "side_quest_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/quest_ref" } },
+    "blockout": {
+      "type": "array",
+      "description": "Grey-box geometry built from simple shapes, replaced by real art later. size is the full [x, y, z] extent. Cylinders stand upright: size = [diameter, height, diameter]. rotation_deg is applied after that.",
+      "items": {
+        "type": "object",
+        "required": ["shape", "role", "position", "size"],
+        "additionalProperties": false,
+        "properties": {
+          "shape": { "enum": ["block", "cylinder", "wedge", "ball"] },
+          "role": { "enum": ["ground", "road", "building", "landmark", "water", "hazard", "prop", "wall", "ramp", "platform"] },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "size": { "$ref": "common.schema.json#/$defs/vec3" },
+          "rotation_deg": { "$ref": "common.schema.json#/$defs/vec3" },
+          "collide": { "type": "boolean", "default": true },
+          "label": { "$ref": "common.schema.json#/$defs/short_text" }
+        }
+      }
+    },
+    "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+  }
+}

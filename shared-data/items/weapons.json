@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/weapons.schema.json",
+  "version": 1,
+  "entries": [
+    {
+      "id": "wpn_hearthwick",
+      "name": "Hearthwick",
+      "category": "weapon",
+      "weapon_class": "katana",
+      "rarity": "common",
+      "level_req": 1,
+      "description": "A Lantern Warden's training katana. A thin line of flame runs down the blade like a lantern wick and flares brighter whenever you parry.",
+      "base_stats": { "damage": 100, "attack_speed": 1.0, "range_studs": 7.5 },
+      "moveset_id": "mvs_lanternblade_katana",
+      "special_ability_id": "abl_wickflare",
+      "passive_ability_id": "abl_kindled_edge",
+      "upgrade_tiers": [
+        { "tier": 1, "damage_bonus_pct": 8, "materials": [{ "material_id": "mat_gloam_dust", "qty": 5 }], "currency_cost": 200 },
+        { "tier": 2, "damage_bonus_pct": 16, "min_level": 10, "materials": [{ "material_id": "mat_gloam_dust", "qty": 10 }, { "material_id": "mat_wick_thread", "qty": 2 }], "currency_cost": 600 },
+        { "tier": 3, "damage_bonus_pct": 26, "min_level": 20, "materials": [{ "material_id": "mat_wick_thread", "qty": 6 }], "currency_cost": 1500 },
+        { "tier": 4, "damage_bonus_pct": 38, "min_level": 35, "materials": [{ "material_id": "mat_wick_thread", "qty": 10 }, { "material_id": "mat_warden_steel", "qty": 2 }], "currency_cost": 4000 },
+        { "tier": 5, "damage_bonus_pct": 52, "min_level": 50, "materials": [{ "material_id": "mat_warden_steel", "qty": 5 }, { "material_id": "mat_eclipse_ember", "qty": 1 }], "currency_cost": 9000, "note": "Needs the Lampeater's Eclipse Ember." }
+      ],
+      "unlock_source": { "type": "story", "ref_id": "qst_main_seven_minutes", "note": "Handed over by Lieutenant Haneda at the end of the opening quest." },
+      "presentation": {
+        "visual": "ast_wpn_hearthwick",
+        "animation": "ast_anim_lanternblade_moveset",
+        "sound": "ast_sfx_lanternblade",
+        "vfx": "ast_vfx_wickflare"
+      },
+      "balance_notes": "Baseline weapon (damage 100); other katanas are balanced against it. Tier 5 (+52%) keeps it usable through the harbor district, but it should fall behind rare weapons found after level 60.",
+      "dev_status": "data_only"
+    }
+  ]
+}

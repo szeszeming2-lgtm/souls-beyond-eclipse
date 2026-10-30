@@ -1,0 +1,71 @@
+{
+  "$schema": "../schemas/map.schema.json",
+  "version": 1,
+  "id": "map_akeboshi_harbor",
+  "region_id": "reg_akeboshi_city",
+  "name": "Akeboshi Harbor District",
+  "environment_asset": "ast_env_akeboshi_harbor",
+  "units": "studs",
+  "bounds": { "min": [-300, -20, -300], "max": [300, 200, 300] },
+  "player_spawn": { "position": [-150, 3, 120], "facing_deg": 45 },
+  "hubs": [
+    {
+      "id": "hub_ferry_terminal",
+      "name": "Ferry Terminal Outpost",
+      "position": [-180, 2, 150],
+      "radius_studs": 40,
+      "services": ["shop", "upgrade", "quest_board", "training", "fast_travel", "save_point", "appearance", "respec"]
+    }
+  ],
+  "fast_travel": [
+    { "id": "ftp_ferry_terminal", "name": "Ferry Terminal", "position": [-170, 2, 140], "unlocked_by": "default" },
+    { "id": "ftp_clocktower_square", "name": "Clocktower Square", "position": [40, 2, 20], "unlocked_by": "discover" }
+  ],
+  "landmarks": [
+    { "id": "lmk_harbor_clocktower", "name": "Harbor Clocktower", "position": [40, 0, -10], "size": [24, 120, 24], "description": "Stopped at 12:07, the moment the eclipse began. Visible from anywhere in the district." },
+    { "id": "lmk_sunrise_bridge", "name": "Sunrise Bridge", "position": [200, 10, -200], "size": [40, 30, 180], "description": "A suspension bridge snapped in half. It points toward something that is not on any map." },
+    { "id": "lmk_lantern_shrine", "name": "Lantern Shrine", "position": [-60, 0, -180], "size": [30, 18, 30], "description": "A tiny neighbourhood shrine ringed with stone lanterns, all dark." }
+  ],
+  "routes": [
+    { "id": "main_street", "kind": "street", "from": "ftp_ferry_terminal", "to": "ftp_clocktower_square", "waypoints": [[-120, 2, 100], [-40, 2, 40]], "width_studs": 24 },
+    { "id": "arcade_alley", "kind": "alley", "from": "ftp_clocktower_square", "to": "lmk_lantern_shrine", "waypoints": [[0, 2, -80], [-40, 2, -140]], "width_studs": 10 },
+    { "id": "promenade", "kind": "waterfront", "from": "ftp_clocktower_square", "to": "arn_promenade_plaza", "waypoints": [[120, 2, 60], [170, 2, 120]], "width_studs": 18 },
+    { "id": "rooftop_run", "kind": "rooftop", "from": "hub_ferry_terminal", "to": "lmk_harbor_clocktower", "waypoints": [[-100, 40, 60], [-20, 46, 10]], "width_studs": 8 },
+    { "id": "bridge_road", "kind": "street", "from": "ftp_clocktower_square", "to": "lmk_sunrise_bridge", "waypoints": [[110, 2, -60], [180, 4, -120]], "width_studs": 20 }
+  ],
+  "spawn_zones": [
+    { "id": "spz_main_street", "center": [-80, 2, 70], "radius_studs": 40, "enemy_ids": ["enm_gloamling"], "level_range": { "min": 1, "max": 5 }, "max_alive": 4, "respawn_s": 45 },
+    { "id": "spz_shopping_arcade", "center": [-20, 2, -110], "radius_studs": 35, "enemy_ids": ["enm_gloamling"], "level_range": { "min": 4, "max": 9 }, "max_alive": 5, "respawn_s": 45 },
+    { "id": "spz_promenade", "center": [140, 2, 90], "radius_studs": 45, "enemy_ids": ["enm_gloamling"], "level_range": { "min": 8, "max": 14 }, "max_alive": 6, "respawn_s": 60 }
+  ],
+  "boss_arenas": [
+    { "id": "arn_promenade_plaza", "boss_id": "enm_lampeater", "center": [210, 2, 170], "radius_studs": 55, "checkpoint_position": [160, 2, 130] }
+  ],
+  "secrets": [
+    { "id": "sec_clocktower_roof", "kind": "viewpoint", "position": [40, 122, -10], "hint": "Something glints at the very top of the stopped clocktower.", "reward": { "xp_base": 150 } },
+    { "id": "sec_shrine_offering_box", "kind": "hidden_chest", "position": [-70, 2, -200], "hint": "Behind the shrine, an offering box is still warm.", "reward": { "items": [{ "item_id": "mat_wick_thread", "qty": 2 }] } },
+    { "id": "sec_ferry_logbook", "kind": "lore_note", "position": [-200, 4, 170], "hint": "The ferry captain's logbook stops mid-sentence at 12:07." }
+  ],
+  "side_quest_ids": ["qst_side_lamplighter"],
+  "blockout": [
+    { "shape": "block", "role": "ground", "position": [0, -1, -40], "size": [600, 2, 520], "label": "District ground" },
+    { "shape": "block", "role": "water", "position": [0, -3, 260], "size": [600, 2, 80], "collide": false, "label": "Harbor water" },
+    { "shape": "block", "role": "platform", "position": [60, 0, 205], "size": [440, 2, 40], "label": "Promenade boardwalk" },
+    { "shape": "block", "role": "road", "position": [-80, 0.1, 70], "size": [24, 0.2, 200], "rotation_deg": [0, 45, 0], "label": "Main street" },
+    { "shape": "block", "role": "building", "position": [-190, 12, 175], "size": [70, 24, 50], "label": "Ferry terminal" },
+    { "shape": "block", "role": "building", "position": [-120, 20, 40], "size": [40, 40, 40], "label": "Apartment block A (rooftop route start)" },
+    { "shape": "block", "role": "building", "position": [-40, 23, -20], "size": [36, 46, 36], "label": "Office block (rooftop route end)" },
+    { "shape": "block", "role": "building", "position": [-30, 10, -110], "size": [16, 20, 120], "label": "Shopping arcade, west row" },
+    { "shape": "block", "role": "building", "position": [10, 10, -110], "size": [16, 20, 120], "label": "Shopping arcade, east row" },
+    { "shape": "block", "role": "landmark", "position": [40, 60, -10], "size": [24, 120, 24], "label": "Harbor Clocktower" },
+    { "shape": "block", "role": "platform", "position": [40, 0.5, 20], "size": [80, 1, 60], "label": "Clocktower square" },
+    { "shape": "block", "role": "landmark", "position": [-60, 4, -180], "size": [30, 8, 30], "label": "Lantern Shrine base" },
+    { "shape": "cylinder", "role": "prop", "position": [-60, 3, -165], "size": [3, 6, 3], "label": "Stone lantern (one of five)" },
+    { "shape": "cylinder", "role": "platform", "position": [210, 0.5, 170], "size": [110, 1, 110], "label": "Promenade plaza (boss arena floor)" },
+    { "shape": "block", "role": "landmark", "position": [200, 10, -200], "size": [40, 4, 180], "label": "Sunrise Bridge deck (broken end)" },
+    { "shape": "block", "role": "wall", "position": [300, 20, 0], "size": [4, 40, 600], "label": "East boundary wall (placeholder)" },
+    { "shape": "block", "role": "wall", "position": [-300, 20, 0], "size": [4, 40, 600], "label": "West boundary wall (placeholder)" },
+    { "shape": "block", "role": "wall", "position": [0, 20, -300], "size": [600, 40, 4], "label": "North boundary wall (placeholder)" }
+  ],
+  "dev_status": "data_only"
+}

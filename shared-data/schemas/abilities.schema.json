@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Abilities: weapon specials, archetype skills, defence, mobility, ultimates and passives",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ability" } }
+  },
+  "$defs": {
+    "ability": {
+      "type": "object",
+      "required": [
+        "id", "name", "description", "kind", "cooldown_s", "cost", "targeting", "damage_type",
+        "power", "range_studs", "area", "timing", "status_effects", "upgrade_levels", "replication",
+        "presentation", "dev_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/ability_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "description": { "$ref": "common.schema.json#/$defs/text" },
+        "kind": {
+          "description": "special = a weapon's own ability (Q). active = archetype skill (E/R). ultimate = transformation or finisher (F).",
+          "enum": ["special", "active", "defensive", "mobility", "ultimate", "passive"]
+        },
+        "cooldown_s": { "type": "number", "minimum": 0, "maximum": 600 },
+        "cost": {
+          "type": "object",
+          "required": ["resource", "amount"],
+          "additionalProperties": false,
+          "properties": {
+            "resource": { "enum": ["spirit", "none"] },
+            "amount": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "targeting": { "enum": ["self", "direction", "locked_target", "ground_point", "nearest_enemy", "none"] },
+        "damage_type": { "$ref": "common.schema.json#/$defs/damage_type" },
+        "power": { "type": "number", "minimum": 0, "maximum": 30, "description": "Multiplier on the user's attack stat. 0 = deals no damage." },
+        "range_studs": { "type": "number", "minimum": 0, "maximum": 400 },
+        "area": { "$ref": "common.schema.json#/$defs/area" },
+        "timing": { "$ref": "common.schema.json#/$defs/timing" },
+        "iframes_s": { "type": "number", "minimum": 0, "maximum": 2, "description": "Invulnerability window, for dodges and some ultimates." },
+        "movement": {
+          "type": "object",
+          "required": ["distance_studs", "duration_s"],
+          "additionalProperties": false,
+          "properties": {
+            "distance_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 200 },
+            "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 }
+          }
+        },
+        "guard": {
+          "type": "object",
+          "description": "Defensive abilities: how guarding and parrying behave.",
+          "required": ["damage_reduction", "parry_window_s"],
+          "additionalProperties": false,
+          "properties": {
+            "damage_reduction": { "$ref": "common.schema.json#/$defs/fraction" },
+            "parry_window_s": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "status_effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/status_application" } },
+        "passive": {
+          "type": "object",
+          "required": ["trigger", "effects"],
+          "additionalProperties": false,
+          "properties": {
+            "trigger": { "enum": ["always", "on_parry", "on_hit", "on_kill", "on_perfect_dodge", "on_low_hp"] },
+            "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/stat_modifier" } },
+            "spirit_gain": { "type": "number", "minimum": 0, "maximum": 100 },
+            "duration_s": { "type": "number", "minimum": 0, "maximum": 120 },
+            "internal_cooldown_s": { "type": "number", "minimum": 0, "maximum": 120 }
+          }
+        },
+        "transformation": {
+          "type": "object",
+          "description": "Ultimate transformations: a timed form with its own stats and look.",
+          "required": ["duration_s", "stat_modifiers", "visual"],
+          "additionalProperties": false,
+          "properties": {
+            "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 60 },
+            "stat_modifiers": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/stat_modifier" } },
+            "replaces_moveset_id": { "$ref": "common.schema.json#/$defs/moveset_ref" },
+            "visual": { "$ref": "common.schema.json#/$defs/asset_ref" }
+          }
+        },
+        "upgrade_levels": {
+          "type": "array",
+          "maxItems": 9,
+          "description": "Level 1 is the base ability. Each entry describes level 2, 3, ... in order.",
+          "items": { "$ref": "#/$defs/upgrade_level" }
+        },
+        "replication": {
+          "type": "object",
+          "description": "What must replicate in multiplayer. The server always decides hits and damage.",
+          "required": ["authority", "client_prediction", "network_notes"],
+          "additionalProperties": false,
+          "properties": {
+            "authority": { "const": "server" },
+            "client_prediction": { "enum": ["none", "visual_only", "movement"] },
+            "network_notes": { "$ref": "common.schema.json#/$defs/text" }
+          }
+        },
+        "presentation": {
+          "type": "object",
+          "required": ["animation"],
+          "additionalProperties": false,
+          "properties": {
+            "animation": { "$ref": "common.schema.json#/$defs/asset_ref" },
+            "vfx": { "$ref": "common.schema.json#/$defs/asset_ref" },
+            "sound": { "$ref": "common.schema.json#/$defs/asset_ref" },
+            "icon": { "$ref": "common.schema.json#/$defs/asset_ref" }
+          }
+        },
+        "balance_notes": { "$ref": "common.schema.json#/$defs/notes" },
+        "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "passive" } } }, "then": { "required": ["passive"] } },
+        { "if": { "properties": { "kind": { "const": "mobility" } } }, "then": { "required": ["movement", "iframes_s"] } },
+        { "if": { "properties": { "kind": { "const": "defensive" } } }, "then": { "required": ["guard"] } }
+      ]
+    },
+    "upgrade_level": {
+      "type": "object",
+      "required": ["level", "changes", "materials", "currency_cost"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 2, "maximum": 10 },
+        "changes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "power": { "type": "number", "minimum": 0, "maximum": 30 },
+            "cooldown_s": { "type": "number", "minimum": 0, "maximum": 600 },
+            "cost_amount": { "type": "number", "minimum": 0, "maximum": 100 },
+            "range_studs": { "type": "number", "minimum": 0, "maximum": 400 },
+            "duration_s": { "type": "number", "minimum": 0, "maximum": 60 },
+            "note": { "$ref": "common.schema.json#/$defs/short_text" }
+          }
+        },
+        "materials": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/material_cost" } },
+        "currency_cost": { "type": "integer", "minimum": 0, "maximum": 100000000 }
+      }
+    }
+  }
+}

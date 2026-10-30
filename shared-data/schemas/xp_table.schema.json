@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GENERATED XP table. Do not edit: run tools/xp_sim/xp_sim.py --write-table.",
+  "description": "Stored as plain numbers so the Roblox and PC editions use identical values instead of each recomputing a formula.",
+  "type": "object",
+  "required": ["$schema", "generated_by", "level_cap", "xp_to_next"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "generated_by": { "const": "tools/xp_sim/xp_sim.py" },
+    "level_cap": { "const": 3000 },
+    "xp_to_next": {
+      "type": "array",
+      "description": "Item [n] (counting from 0) = XP needed to go from level n+1 to n+2.",
+      "minItems": 2999,
+      "maxItems": 2999,
+      "items": { "type": "integer", "minimum": 1, "maximum": 100000000 }
+    }
+  }
+}

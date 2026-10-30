@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Asset registry: every model, animation, sound and texture the game uses, with its spec, current placeholder, source and license.",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/asset" } }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["id", "name", "kind", "status", "spec", "placeholder", "source", "license"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/asset_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "kind": { "enum": ["character_model", "weapon_model", "enemy_model", "environment", "animation_set", "sound_set", "music", "vfx", "icon", "ui", "texture", "font"] },
+        "status": {
+          "description": "needed = the real asset does not exist and no stand-in is in the game yet; placeholder = a labelled stand-in is in the game; final = the real asset is in.",
+          "enum": ["needed", "placeholder", "final"]
+        },
+        "spec": { "$ref": "common.schema.json#/$defs/text", "description": "What the final asset must be (style, size, budget, rig, length...)." },
+        "placeholder": { "$ref": "common.schema.json#/$defs/short_text", "description": "The labelled stand-in the game uses (or will use) until the real asset exists." },
+        "source": { "$ref": "common.schema.json#/$defs/short_text", "description": "Where the stand-in (or, once final, the real asset) comes from." },
+        "license": { "$ref": "common.schema.json#/$defs/short_text", "description": "License of the stand-in (or, once final, the real asset)." },
+        "author": { "$ref": "common.schema.json#/$defs/short_text" },
+        "source_url": { "type": "string", "pattern": "^https://", "maxLength": 300 }
+      },
+      "if": { "properties": { "status": { "const": "final" } } },
+      "then": { "required": ["author"] }
+    }
+  }
+}

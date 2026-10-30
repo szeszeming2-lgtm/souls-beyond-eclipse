@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Progression: level cap, XP curve inputs, level bands, milestones, stat scaling and fairness rules",
+  "type": "object",
+  "required": ["$schema", "version", "level_cap", "xp_curve", "level_bands", "milestones", "skill_points", "stat_scaling", "level_sync", "catch_up", "anti_grind", "anti_exploit", "xp_sources", "respec", "currencies"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "level_cap": { "const": 3000 },
+    "xp_curve": {
+      "type": "object",
+      "description": "XP to go from level L to L+1 = reference_xp_per_minute x reward_scale(L) x pace_minutes(L), rounded to round_to. reward_scale(L) = 1 + (L - 1) x reward_growth_per_level. pace_minutes is a straight-line blend between pace_points. tools/xp_sim turns this into xp_table.json.",
+      "required": ["reference_xp_per_minute", "reward_growth_per_level", "pace_points", "round_to"],
+      "additionalProperties": false,
+      "properties": {
+        "reference_xp_per_minute": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000, "description": "XP per minute of normal play at level 1." },
+        "reward_growth_per_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "pace_points": {
+          "type": "array",
+          "minItems": 2,
+          "description": "[level, minutes of normal play to finish that level]. Must start at level 1 and end at level_cap - 1.",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "number", "minimum": 0, "maximum": 3000 }
+          }
+        },
+        "round_to": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      }
+    },
+    "level_bands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "min", "max", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/band_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "min": { "$ref": "common.schema.json#/$defs/level" },
+          "max": { "$ref": "common.schema.json#/$defs/level" },
+          "summary": { "$ref": "common.schema.json#/$defs/text" }
+        }
+      }
+    },
+    "milestones": {
+      "type": "object",
+      "required": ["interval", "standard_reward", "major"],
+      "additionalProperties": false,
+      "properties": {
+        "interval": { "const": 50 },
+        "standard_reward": { "$ref": "common.schema.json#/$defs/reward" },
+        "major": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["level", "name", "reward"],
+            "additionalProperties": false,
+            "properties": {
+              "level": { "$ref": "common.schema.json#/$defs/level" },
+              "name": { "$ref": "common.schema.json#/$defs/name" },
+              "reward": { "$ref": "common.schema.json#/$defs/reward" }
+            }
+          }
+        }
+      }
+    },
+    "skill_points": {
+      "type": "object",
+      "required": ["schedule"],
+      "additionalProperties": false,
+      "properties": {
+        "schedule": {
+          "type": "array",
+          "minItems": 1,
+          "description": "One skill point every `every` levels from `from` to `to` (inclusive).",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "every"],
+            "additionalProperties": false,
+            "properties": {
+              "from": { "$ref": "common.schema.json#/$defs/level" },
+              "to": { "$ref": "common.schema.json#/$defs/level" },
+              "every": { "type": "integer", "minimum": 1, "maximum": 100 }
+            }
+          }
+        }
+      }
+    },
+    "stat_scaling": {
+      "type": "object",
+      "description": "stat(L) = base x (1 + (L - 1) x growth_per_level). Players and enemies grow at the same rate, so same-level fights feel the same at level 5 and level 2500.",
+      "required": ["growth_per_level", "player_base", "enemy_base", "spirit_max"],
+      "additionalProperties": false,
+      "properties": {
+        "growth_per_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "player_base": { "$ref": "#/$defs/base_stats" },
+        "enemy_base": { "$ref": "#/$defs/base_stats" },
+        "spirit_max": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000, "description": "Spirit energy does not scale with level, so ability costs stay readable." }
+      }
+    },
+    "level_sync": {
+      "type": "object",
+      "description": "In an area below the player's level, the player's stats are scaled down to the area's top level + margin, while XP still uses the player's real level x synced_reward_multiplier, so old areas stay worth visiting.",
+      "required": ["enabled", "margin_levels", "synced_reward_multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "margin_levels": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "synced_reward_multiplier": { "$ref": "common.schema.json#/$defs/fraction" }
+      }
+    },
+    "catch_up": {
+      "type": "object",
+      "required": ["below_recommended_by", "bonus_per_level_below", "max_bonus", "returning_player"],
+      "additionalProperties": false,
+      "properties": {
+        "below_recommended_by": { "type": "integer", "minimum": 1, "maximum": 500, "description": "Bonus XP starts when the player is this many levels under the area's recommended level." },
+        "bonus_per_level_below": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_bonus": { "type": "number", "minimum": 0, "maximum": 3 },
+        "returning_player": {
+          "type": "object",
+          "required": ["days_away", "bonus_multiplier", "bonus_minutes"],
+          "additionalProperties": false,
+          "properties": {
+            "days_away": { "type": "integer", "minimum": 1, "maximum": 365 },
+            "bonus_multiplier": { "type": "number", "minimum": 1, "maximum": 5 },
+            "bonus_minutes": { "type": "integer", "minimum": 0, "maximum": 6000 }
+          }
+        }
+      }
+    },
+    "anti_grind": {
+      "type": "object",
+      "description": "Killing the same enemy type over and over slowly gives less XP, so varied play is always the fastest way to level.",
+      "required": ["window_s", "full_reward_kills", "decay_per_kill", "floor_multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "window_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 7200 },
+        "full_reward_kills": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "decay_per_kill": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplier applied per extra kill (0.9 = 10% less each kill)." },
+        "floor_multiplier": { "$ref": "common.schema.json#/$defs/fraction" }
+      }
+    },
+    "anti_exploit": {
+      "type": "object",
+      "description": "Server sanity limits. They log and clamp; they never ban or wipe a player automatically.",
+      "required": ["xp_rate_alarm_factor", "max_reward_events_per_second", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "xp_rate_alarm_factor": { "type": "number", "minimum": 1, "maximum": 100, "description": "Alarm when XP per minute exceeds expected income x this factor." },
+        "max_reward_events_per_second": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "action": { "enum": ["log_and_clamp"] }
+      }
+    },
+    "xp_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "kind", "base_xp", "typical_minutes", "repeatable"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/local_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "kind": { "enum": ["story_mission", "side_quest", "exploration", "combat", "boss", "dungeon", "training", "faction_mission", "group_activity"] },
+          "base_xp": { "type": "integer", "minimum": 0, "maximum": 1000000, "description": "XP at level 1, before the reward scale." },
+          "typical_minutes": { "type": "number", "exclusiveMinimum": 0, "maximum": 600 },
+          "repeatable": { "type": "boolean" }
+        }
+      }
+    },
+    "respec": {
+      "type": "object",
+      "required": ["allowed_anytime", "currency_cost"],
+      "additionalProperties": false,
+      "properties": {
+        "allowed_anytime": { "const": true },
+        "currency_cost": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      }
+    },
+    "currencies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description", "max"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/currency_id" },
+          "name": { "$ref": "common.schema.json#/$defs/name" },
+          "description": { "$ref": "common.schema.json#/$defs/short_text" },
+          "max": { "type": "integer", "minimum": 1, "maximum": 1000000000000 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "base_stats": {
+      "type": "object",
+      "required": ["max_hp", "attack", "defense"],
+      "additionalProperties": false,
+      "properties": {
+        "max_hp": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000000 },
+        "attack": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "defense": { "type": "number", "minimum": 0, "maximum": 100000 }
+      }
+    }
+  }
+}

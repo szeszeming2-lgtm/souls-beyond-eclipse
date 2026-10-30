@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill trees. Players can respec at any time, so no node is a permanent trap.",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/skill_tree" } }
+  },
+  "$defs": {
+    "skill_tree": {
+      "type": "object",
+      "required": ["id", "name", "archetype_id", "nodes", "dev_status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/skill_tree_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "archetype_id": { "$ref": "common.schema.json#/$defs/archetype_ref" },
+        "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "name", "description", "cost_points", "requires", "effect", "grid"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/local_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "description": { "$ref": "common.schema.json#/$defs/short_text" },
+        "cost_points": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "min_level": { "$ref": "common.schema.json#/$defs/level" },
+        "requires": { "type": "array", "uniqueItems": true, "items": { "$ref": "common.schema.json#/$defs/local_id" }, "description": "Node ids in this same tree." },
+        "effect": { "$ref": "#/$defs/effect" },
+        "grid": {
+          "type": "object",
+          "description": "Position in the skill tree screen.",
+          "required": ["column", "row"],
+          "additionalProperties": false,
+          "properties": {
+            "column": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "row": { "type": "integer", "minimum": 0, "maximum": 40 }
+          }
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["unlock_ability", "ability_upgrade", "stat_bonus"] },
+        "ability_id": { "$ref": "common.schema.json#/$defs/ability_ref" },
+        "stat_modifier": { "$ref": "common.schema.json#/$defs/stat_modifier" }
+      },
+      "allOf": [
+        { "if": { "properties": { "type": { "enum": ["unlock_ability", "ability_upgrade"] } } }, "then": { "required": ["ability_id"] } },
+        { "if": { "properties": { "type": { "const": "stat_bonus" } } }, "then": { "required": ["stat_modifier"] } }
+      ]
+    }
+  }
+}

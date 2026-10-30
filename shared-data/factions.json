@@ -1,0 +1,90 @@
+{
+  "$schema": "./schemas/factions.schema.json",
+  "version": 1,
+  "entries": [
+    {
+      "id": "fac_lantern_wardens",
+      "name": "Lantern Wardens",
+      "motto": "Every flame counted. Every shadow named.",
+      "description": "Akeboshi City's quiet guardians. Each Warden carries a blade tempered in a shrine lantern and keeps a ledger of every soul-flame in their district. After the Seven-Minute Eclipse they recruit the player as a probationary 'Wick'.",
+      "combat_identity": "Balanced blade fighters who punish enemy attacks with parries and flame arcs.",
+      "playable": true,
+      "archetype_ids": ["arc_lanternblade"],
+      "home_region_id": "reg_akeboshi_city",
+      "theme_color": "#F2A33A",
+      "dev_status": "data_only"
+    },
+    {
+      "id": "fac_skyreaders",
+      "name": "Skyreader Observatory",
+      "motto": "Chart the dark, and it cannot surprise you.",
+      "description": "Astronomers of the hidden capital who fire condensed starlight. They believe the eclipse was predicted in an erased page of their star charts.",
+      "combat_identity": "Ranged fighters who mark enemies with star-points, then link and detonate the marks.",
+      "playable": true,
+      "archetype_ids": ["arc_starfletcher"],
+      "home_region_id": "reg_amagiri_capital",
+      "theme_color": "#7FB8FF",
+      "dev_status": "concept"
+    },
+    {
+      "id": "fac_omokage_troupe",
+      "name": "Omokage Troupe",
+      "motto": "Wear the face of those who came before.",
+      "description": "Travelling festival dancers whose carved masks hold the echoes of their ancestors. A dancer changes masks mid-performance and fights in the style of whoever the mask remembers.",
+      "combat_identity": "Stance switchers: swapping masks mid-combo changes moveset and transforms the dancer.",
+      "playable": true,
+      "archetype_ids": ["arc_maskdancer"],
+      "home_region_id": "reg_ura_akeboshi",
+      "theme_color": "#D9466A",
+      "dev_status": "concept"
+    },
+    {
+      "id": "fac_paper_court",
+      "name": "Paper Court",
+      "motto": "What is folded with care, obeys with care.",
+      "description": "Archivist-summoners who fold talismans into living paper familiars. They guard the Thousand Stacks, the archive beneath the capital.",
+      "combat_identity": "Summoners who fight through paper familiars that scout, shield and swarm.",
+      "playable": true,
+      "archetype_ids": ["arc_foldcaller"],
+      "home_region_id": "reg_thousand_stacks",
+      "theme_color": "#E8E2CF",
+      "dev_status": "concept"
+    },
+    {
+      "id": "fac_bellhold",
+      "name": "Bellhold Monastery",
+      "motto": "Strike true, and the soul rings back.",
+      "description": "Mountain monks who train the soul like a temple bell. Every clean hit adds resonance until the monk releases it as a shockwave. Their great bell has fallen silent.",
+      "combat_identity": "Unarmed martial artists who build resonance with hits and release it in area bursts.",
+      "playable": true,
+      "archetype_ids": ["arc_bellstriker"],
+      "home_region_id": "reg_shirokane_peaks",
+      "theme_color": "#9AD1C8",
+      "dev_status": "concept"
+    },
+    {
+      "id": "fac_unlit",
+      "name": "The Unlit",
+      "motto": "No flame, no shadow, no trace.",
+      "description": "Outcasts who dimmed their own soul-flames so the Gloam cannot see them. Distrusted by every other faction, they become uneasy allies during the war.",
+      "combat_identity": "High-mobility assassins who blink through shadows and strike from behind.",
+      "playable": true,
+      "archetype_ids": ["arc_duskrunner"],
+      "home_region_id": "reg_inverse_tide",
+      "theme_color": "#5B4B8A",
+      "dev_status": "concept"
+    },
+    {
+      "id": "fac_penumbral_synod",
+      "name": "Penumbral Synod",
+      "motto": "Let every flame rest.",
+      "description": "Rulers of the Gloam. They believe a soul-flame only exists to be lost, and plan a permanent eclipse of the Sun Below so no soul burns out again. Enemy faction, not playable.",
+      "combat_identity": "Enemy faction: commanders who shape the Gloam into soldiers.",
+      "playable": false,
+      "archetype_ids": [],
+      "home_region_id": "reg_inverse_tide",
+      "theme_color": "#2B2140",
+      "dev_status": "concept"
+    }
+  ]
+}

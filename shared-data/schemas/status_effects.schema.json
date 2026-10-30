@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Status effects (buffs and debuffs)",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/status_effect" } }
+  },
+  "$defs": {
+    "status_effect": {
+      "type": "object",
+      "required": ["id", "name", "description", "polarity", "category", "duration_s", "max_stacks", "stat_modifiers", "dispellable", "show_on_hud", "dev_status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/status_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "description": { "$ref": "common.schema.json#/$defs/short_text" },
+        "polarity": { "enum": ["buff", "debuff"] },
+        "category": { "enum": ["damage_over_time", "heal_over_time", "stat_modifier", "hard_cc", "soft_cc", "shield"] },
+        "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 600 },
+        "max_stacks": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "tick_interval_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "tick_power": { "type": "number", "minimum": 0, "maximum": 5, "description": "Per tick, as a multiplier on the source's attack stat." },
+        "stat_modifiers": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/stat_modifier" } },
+        "cc": {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "enum": ["stun", "knockdown", "root", "slow", "silence"] },
+            "slow_fraction": { "$ref": "common.schema.json#/$defs/fraction" }
+          }
+        },
+        "dispellable": { "type": "boolean" },
+        "show_on_hud": { "type": "boolean" },
+        "icon": { "$ref": "common.schema.json#/$defs/asset_ref" },
+        "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+      },
+      "allOf": [
+        { "if": { "properties": { "category": { "enum": ["hard_cc", "soft_cc"] } } }, "then": { "required": ["cc"] } },
+        { "if": { "properties": { "category": { "enum": ["damage_over_time", "heal_over_time"] } } }, "then": { "required": ["tick_interval_s", "tick_power"] } }
+      ]
+    }
+  }
+}

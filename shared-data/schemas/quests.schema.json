@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Quests (main story, side, faction, companion, hunts, training)",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/quest" } }
+  },
+  "$defs": {
+    "quest": {
+      "type": "object",
+      "required": ["id", "name", "type", "band_id", "region_id", "recommended_level", "summary", "prerequisites", "objectives", "rewards", "dev_status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/quest_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "type": { "enum": ["main", "side", "faction", "companion", "hunt", "training", "exploration"] },
+        "band_id": { "$ref": "common.schema.json#/$defs/band_ref" },
+        "region_id": { "$ref": "common.schema.json#/$defs/region_ref" },
+        "recommended_level": { "$ref": "common.schema.json#/$defs/level" },
+        "summary": { "$ref": "common.schema.json#/$defs/text" },
+        "giver_id": { "$ref": "common.schema.json#/$defs/character_ref" },
+        "prerequisites": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "Quests that must be finished first. Main quests must only require other main quests, so the story never depends on side content.",
+          "items": { "$ref": "common.schema.json#/$defs/quest_ref" }
+        },
+        "objectives": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/objective" } },
+        "rewards": { "$ref": "common.schema.json#/$defs/reward" },
+        "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+      }
+    },
+    "objective": {
+      "type": "object",
+      "required": ["id", "type", "description", "count"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/local_id" },
+        "type": { "enum": ["talk", "reach", "defeat", "collect", "interact", "survive", "tutorial", "escort"] },
+        "description": { "$ref": "common.schema.json#/$defs/short_text" },
+        "target_id": {
+          "type": "string",
+          "description": "Who or what the objective is about: a character, enemy, place or item.",
+          "pattern": "^(?:chr|enm|hub|ftp|lmk|spz|arn|sec|mat|wpn)_[a-z0-9]+(?:_[a-z0-9]+)*$",
+          "x-ref": ["chr", "enm", "hub", "ftp", "lmk", "spz", "arn", "sec", "mat", "wpn"]
+        },
+        "count": { "type": "integer", "minimum": 1, "maximum": 999 },
+        "optional": { "type": "boolean" }
+      }
+    }
+  }
+}

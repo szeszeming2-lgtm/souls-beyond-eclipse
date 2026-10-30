@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unified input actions. Game code asks 'was light_attack pressed?', never 'was MouseButton1 pressed?'.",
+  "description": "Input names follow Roblox KeyCode names (the Roblox edition comes first). The PC edition maps the same names to Godot inputs.",
+  "type": "object",
+  "required": ["$schema", "version", "actions", "presets", "gamepad", "touch"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "actions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/action" } },
+    "presets": {
+      "type": "array",
+      "description": "Named groups of binding changes the player can apply from Settings (for example, right-click = guard).",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "description", "overrides"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/local_id" },
+          "label": { "$ref": "common.schema.json#/$defs/name" },
+          "description": { "$ref": "common.schema.json#/$defs/short_text" },
+          "overrides": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["action_id", "device", "bindings"],
+              "additionalProperties": false,
+              "properties": {
+                "action_id": { "$ref": "common.schema.json#/$defs/local_id" },
+                "device": { "enum": ["keyboard_mouse", "gamepad", "touch"] },
+                "bindings": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "gamepad": {
+      "type": "object",
+      "required": ["sensitivity_default", "sensitivity_min", "sensitivity_max", "vibration_default"],
+      "additionalProperties": false,
+      "properties": {
+        "sensitivity_default": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "sensitivity_min": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "sensitivity_max": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "vibration_default": { "type": "boolean" }
+      }
+    },
+    "touch": {
+      "type": "object",
+      "required": ["ui_scale_default", "ui_scale_min", "ui_scale_max", "layouts"],
+      "additionalProperties": false,
+      "properties": {
+        "ui_scale_default": { "type": "number", "minimum": 0.5, "maximum": 2 },
+        "ui_scale_min": { "type": "number", "minimum": 0.5, "maximum": 2 },
+        "ui_scale_max": { "type": "number", "minimum": 0.5, "maximum": 2 },
+        "layouts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["standard", "one_handed_left", "one_handed_right"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "required": ["id", "label", "context", "kind", "bindings", "remappable"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/local_id" },
+        "label": { "$ref": "common.schema.json#/$defs/name" },
+        "context": { "enum": ["gameplay", "menu", "global"], "description": "global actions work in every context." },
+        "kind": { "enum": ["button", "axis2d"] },
+        "press": { "enum": ["tap", "hold", "tap_or_hold"] },
+        "bindings": {
+          "type": "object",
+          "description": "Every action needs at least one binding on every device, so no device is ever stuck.",
+          "required": ["keyboard_mouse", "gamepad", "touch"],
+          "additionalProperties": false,
+          "properties": {
+            "keyboard_mouse": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/keyboard_mouse_input" } },
+            "gamepad": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/gamepad_input" } },
+            "touch": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/touch_input" } }
+          }
+        },
+        "remappable": { "type": "boolean" }
+      }
+    },
+    "keyboard_mouse_input": {
+      "enum": [
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Zero",
+        "Space", "LeftShift", "RightShift", "LeftControl", "RightControl", "LeftAlt", "RightAlt", "Tab", "Escape", "Return", "Backspace", "CapsLock",
+        "Up", "Down", "Left", "Right", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+        "MouseButton1", "MouseButton2", "MouseButton3", "MouseWheel", "MouseDelta",
+        "Composite:WASD", "Composite:Arrows"
+      ]
+    },
+    "gamepad_input": {
+      "enum": [
+        "ButtonA", "ButtonB", "ButtonX", "ButtonY", "ButtonL1", "ButtonR1", "ButtonL2", "ButtonR2", "ButtonL3", "ButtonR3",
+        "ButtonStart", "ButtonSelect", "DPadUp", "DPadDown", "DPadLeft", "DPadRight", "Composite:DPad", "Thumbstick1", "Thumbstick2"
+      ]
+    },
+    "touch_input": {
+      "enum": [
+        "TouchStickMove", "TouchCameraSwipe", "TouchTap", "TouchButtonAttack", "TouchButtonHeavy", "TouchButtonGuard", "TouchButtonDodge",
+        "TouchButtonJump", "TouchButtonAbility1", "TouchButtonAbility2", "TouchButtonAbility3", "TouchButtonUltimate", "TouchButtonLockOn",
+        "TouchButtonInteract", "TouchButtonPause", "TouchButtonBack", "TouchButtonSprint"
+      ]
+    }
+  }
+}

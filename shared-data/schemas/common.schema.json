@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Shared definitions used by every other schema",
+  "$defs": {
+    "dev_status": {
+      "description": "Honest build status. concept = idea only; data_only = complete data, not in the game yet; in_progress = being implemented; playable_placeholder = works in game with placeholder art; final = shipped quality.",
+      "enum": ["concept", "data_only", "in_progress", "playable_placeholder", "final"]
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 48 },
+    "short_text": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "text": { "type": "string", "minLength": 1, "maxLength": 1200 },
+    "notes": { "type": "string", "maxLength": 1200 },
+    "file_version": { "type": "integer", "minimum": 1, "description": "Format version of this data file, for future migrations." },
+    "seconds": { "type": "number", "minimum": 0, "maximum": 3600 },
+    "fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "multiplier": { "type": "number", "minimum": 0, "maximum": 20 },
+    "level": { "type": "integer", "minimum": 1, "maximum": 3000 },
+    "level_range": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "$ref": "#/$defs/level" },
+        "max": { "$ref": "#/$defs/level" }
+      }
+    },
+    "studs": { "type": "number", "minimum": 0, "maximum": 20000, "description": "World distance. 1 unit = 1 Roblox stud." },
+    "vec3": {
+      "type": "array",
+      "description": "[x, y, z] in studs. y is up.",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number", "minimum": -20000, "maximum": 20000 }
+    },
+    "color_hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "rarity": { "enum": ["common", "uncommon", "rare", "epic", "legendary", "mythic"] },
+    "damage_type": { "enum": ["slash", "pierce", "blunt", "spirit", "flame", "frost", "shadow", "light", "none"] },
+    "weapon_class": { "enum": ["katana", "bow", "mask_fans", "paper_talismans", "gauntlets", "twin_daggers"] },
+    "stat": {
+      "enum": [
+        "max_hp",
+        "attack",
+        "defense",
+        "move_speed",
+        "attack_speed",
+        "crit_chance",
+        "crit_damage",
+        "spirit_regen",
+        "spirit_cost",
+        "cooldown_rate",
+        "damage_taken",
+        "poise",
+        "guard_strength",
+        "healing_received"
+      ]
+    },
+    "stat_modifier": {
+      "type": "object",
+      "required": ["stat", "mode", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "stat": { "$ref": "#/$defs/stat" },
+        "mode": { "enum": ["add_percent", "add_flat"] },
+        "value": { "type": "number", "minimum": -1000, "maximum": 1000 }
+      }
+    },
+
+    "faction_id": { "type": "string", "maxLength": 48, "pattern": "^fac_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "archetype_id": { "type": "string", "maxLength": 48, "pattern": "^arc_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "skill_tree_id": { "type": "string", "maxLength": 48, "pattern": "^skt_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "moveset_id": { "type": "string", "maxLength": 48, "pattern": "^mvs_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "ability_id": { "type": "string", "maxLength": 48, "pattern": "^abl_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "status_id": { "type": "string", "maxLength": 48, "pattern": "^sts_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "weapon_id": { "type": "string", "maxLength": 48, "pattern": "^wpn_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "material_id": { "type": "string", "maxLength": 48, "pattern": "^mat_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "enemy_id": { "type": "string", "maxLength": 48, "pattern": "^enm_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "character_id": { "type": "string", "maxLength": 48, "pattern": "^chr_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "quest_id": { "type": "string", "maxLength": 48, "pattern": "^qst_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "region_id": { "type": "string", "maxLength": 48, "pattern": "^reg_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "map_id": { "type": "string", "maxLength": 48, "pattern": "^map_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "asset_id": { "type": "string", "maxLength": 48, "pattern": "^ast_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "cosmetic_id": { "type": "string", "maxLength": 48, "pattern": "^cos_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "currency_id": { "type": "string", "maxLength": 48, "pattern": "^cur_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "band_id": { "type": "string", "maxLength": 48, "pattern": "^bnd_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "hub_id": { "type": "string", "maxLength": 48, "pattern": "^hub_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "fast_travel_id": { "type": "string", "maxLength": 48, "pattern": "^ftp_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "landmark_id": { "type": "string", "maxLength": 48, "pattern": "^lmk_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "spawn_zone_id": { "type": "string", "maxLength": 48, "pattern": "^spz_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "arena_id": { "type": "string", "maxLength": 48, "pattern": "^arn_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "secret_id": { "type": "string", "maxLength": 48, "pattern": "^sec_[a-z0-9]+(?:_[a-z0-9]+)*$" },
+    "local_id": {
+      "type": "string",
+      "description": "An id that only needs to be unique inside its parent (an attack inside one enemy, a node inside one skill tree). It must not start with a global prefix like abl_ or wpn_.",
+      "maxLength": 48,
+      "pattern": "^(?!(?:fac|arc|skt|mvs|abl|sts|wpn|mat|enm|chr|qst|reg|map|ast|cos|cur|bnd|hub|ftp|lmk|spz|arn|sec)_)[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+
+    "faction_ref": { "$ref": "#/$defs/faction_id", "x-ref": ["fac"] },
+    "archetype_ref": { "$ref": "#/$defs/archetype_id", "x-ref": ["arc"] },
+    "skill_tree_ref": { "$ref": "#/$defs/skill_tree_id", "x-ref": ["skt"] },
+    "moveset_ref": { "$ref": "#/$defs/moveset_id", "x-ref": ["mvs"] },
+    "ability_ref": { "$ref": "#/$defs/ability_id", "x-ref": ["abl"] },
+    "status_ref": { "$ref": "#/$defs/status_id", "x-ref": ["sts"] },
+    "weapon_ref": { "$ref": "#/$defs/weapon_id", "x-ref": ["wpn"] },
+    "material_ref": { "$ref": "#/$defs/material_id", "x-ref": ["mat"] },
+    "enemy_ref": { "$ref": "#/$defs/enemy_id", "x-ref": ["enm"] },
+    "character_ref": { "$ref": "#/$defs/character_id", "x-ref": ["chr"] },
+    "quest_ref": { "$ref": "#/$defs/quest_id", "x-ref": ["qst"] },
+    "region_ref": { "$ref": "#/$defs/region_id", "x-ref": ["reg"] },
+    "map_ref": { "$ref": "#/$defs/map_id", "x-ref": ["map"] },
+    "asset_ref": { "$ref": "#/$defs/asset_id", "x-ref": ["ast"] },
+    "cosmetic_ref": { "$ref": "#/$defs/cosmetic_id", "x-ref": ["cos"] },
+    "currency_ref": { "$ref": "#/$defs/currency_id", "x-ref": ["cur"] },
+    "band_ref": { "$ref": "#/$defs/band_id", "x-ref": ["bnd"] },
+    "arena_ref": { "$ref": "#/$defs/arena_id", "x-ref": ["arn"] },
+    "item_ref": {
+      "description": "Anything that can sit in an inventory.",
+      "type": "string",
+      "maxLength": 48,
+      "pattern": "^(?:wpn|mat)_[a-z0-9]+(?:_[a-z0-9]+)*$",
+      "x-ref": ["wpn", "mat"]
+    },
+    "place_ref": {
+      "description": "A point of interest on a map: hub, fast-travel point, landmark, spawn zone, boss arena or secret.",
+      "type": "string",
+      "maxLength": 48,
+      "pattern": "^(?:hub|ftp|lmk|spz|arn|sec)_[a-z0-9]+(?:_[a-z0-9]+)*$",
+      "x-ref": ["hub", "ftp", "lmk", "spz", "arn", "sec"]
+    },
+
+    "item_stack": {
+      "type": "object",
+      "required": ["item_id", "qty"],
+      "additionalProperties": false,
+      "properties": {
+        "item_id": { "$ref": "#/$defs/item_ref" },
+        "qty": { "type": "integer", "minimum": 1, "maximum": 9999 }
+      }
+    },
+    "material_cost": {
+      "type": "object",
+      "required": ["material_id", "qty"],
+      "additionalProperties": false,
+      "properties": {
+        "material_id": { "$ref": "#/$defs/material_ref" },
+        "qty": { "type": "integer", "minimum": 1, "maximum": 9999 }
+      }
+    },
+    "currency_amount": {
+      "type": "object",
+      "required": ["currency_id", "amount"],
+      "additionalProperties": false,
+      "properties": {
+        "currency_id": { "$ref": "#/$defs/currency_ref" },
+        "amount": { "type": "integer", "minimum": 0, "maximum": 100000000 }
+      }
+    },
+    "reward": {
+      "description": "Everything a player can receive at once. Rewards are granted by the server only. XP and currency amounts are level-1 values: the server multiplies them by the reward scale for the content's level.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "xp_base": { "type": "integer", "minimum": 0, "maximum": 1000000, "description": "XP at level 1; the game multiplies it by the reward scale for the content's level." },
+        "currency": { "type": "array", "items": { "$ref": "#/$defs/currency_amount" } },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/item_stack" } },
+        "cosmetics": { "type": "array", "items": { "$ref": "#/$defs/cosmetic_ref" }, "uniqueItems": true },
+        "skill_points": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "title": { "$ref": "#/$defs/name" },
+        "unlocks": { "type": "array", "items": { "$ref": "#/$defs/short_text" } }
+      }
+    },
+    "unlock_source": {
+      "description": "Where a player gets something. There is deliberately no real-money option: power is never sold.",
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["starter", "story", "quest", "boss", "shop", "crafting", "exploration", "milestone", "faction", "achievement", "drop"] },
+        "ref_id": {
+          "type": "string",
+          "description": "Optional id of the quest, boss, region, place or faction this comes from.",
+          "pattern": "^(?:qst|enm|reg|fac|hub|ftp|lmk|spz|arn|sec)_[a-z0-9]+(?:_[a-z0-9]+)*$",
+          "x-ref": ["qst", "enm", "reg", "fac", "hub", "ftp", "lmk", "spz", "arn", "sec"]
+        },
+        "note": { "$ref": "#/$defs/short_text" }
+      }
+    },
+    "status_application": {
+      "type": "object",
+      "required": ["status_id", "chance"],
+      "additionalProperties": false,
+      "properties": {
+        "status_id": { "$ref": "#/$defs/status_ref" },
+        "chance": { "$ref": "#/$defs/fraction" },
+        "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 120, "description": "Overrides the status effect's own duration." }
+      }
+    },
+    "area": {
+      "description": "Shape of an attack or ability's hit area. Required size fields depend on the shape.",
+      "type": "object",
+      "required": ["shape"],
+      "additionalProperties": false,
+      "properties": {
+        "shape": { "enum": ["single_target", "circle", "cone", "line", "box", "ring"] },
+        "radius_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+        "angle_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
+        "length_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+        "width_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 }
+      },
+      "allOf": [
+        { "if": { "properties": { "shape": { "const": "circle" } } }, "then": { "required": ["radius_studs"] } },
+        { "if": { "properties": { "shape": { "const": "cone" } } }, "then": { "required": ["radius_studs", "angle_deg"] } },
+        { "if": { "properties": { "shape": { "enum": ["line", "box"] } } }, "then": { "required": ["length_studs", "width_studs"] } },
+        { "if": { "properties": { "shape": { "const": "ring" } } }, "then": { "required": ["radius_studs", "width_studs"] } }
+      ]
+    },
+    "timing": {
+      "description": "Windup (the readable tell), active frames, recovery. Seconds.",
+      "type": "object",
+      "required": ["windup_s", "active_s", "recovery_s"],
+      "additionalProperties": false,
+      "properties": {
+        "windup_s": { "type": "number", "minimum": 0, "maximum": 10 },
+        "active_s": { "type": "number", "minimum": 0, "maximum": 30 },
+        "recovery_s": { "type": "number", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "presentation": {
+      "description": "Slots for visual, animation and sound assets. Each points at an entry in assets.json (which may be a labelled placeholder).",
+      "type": "object",
+      "required": ["visual", "animation", "sound"],
+      "additionalProperties": false,
+      "properties": {
+        "visual": { "$ref": "#/$defs/asset_ref" },
+        "animation": { "$ref": "#/$defs/asset_ref" },
+        "sound": { "$ref": "#/$defs/asset_ref" },
+        "vfx": { "$ref": "#/$defs/asset_ref" },
+        "icon": { "$ref": "#/$defs/asset_ref" }
+      }
+    }
+  }
+}

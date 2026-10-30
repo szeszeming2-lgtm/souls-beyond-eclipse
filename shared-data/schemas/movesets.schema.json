@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Movesets: light and heavy combo chains for a weapon class",
+  "type": "object",
+  "required": ["$schema", "version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/moveset" } }
+  },
+  "$defs": {
+    "moveset": {
+      "type": "object",
+      "required": ["id", "name", "weapon_class", "light_chain", "heavy_chain", "combo_reset_s", "animation_set", "dev_status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/moveset_id" },
+        "name": { "$ref": "common.schema.json#/$defs/name" },
+        "weapon_class": { "$ref": "common.schema.json#/$defs/weapon_class" },
+        "light_chain": { "type": "array", "minItems": 1, "maxItems": 6, "items": { "$ref": "#/$defs/attack_step" } },
+        "heavy_chain": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/attack_step" } },
+        "dash_attack": { "$ref": "#/$defs/attack_step" },
+        "air_attack": { "$ref": "#/$defs/attack_step" },
+        "combo_reset_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 3, "description": "Pause longer than this and the chain starts over." },
+        "animation_set": { "$ref": "common.schema.json#/$defs/asset_ref" },
+        "dev_status": { "$ref": "common.schema.json#/$defs/dev_status" }
+      }
+    },
+    "attack_step": {
+      "type": "object",
+      "required": ["id", "power", "damage_type", "timing", "range_studs", "arc_deg", "knockback_studs", "poise_damage", "dodge_cancel_after_s"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/local_id" },
+        "power": { "type": "number", "exclusiveMinimum": 0, "maximum": 10, "description": "Multiplier on the attacker's attack stat." },
+        "hit_count": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "damage_type": { "$ref": "common.schema.json#/$defs/damage_type" },
+        "timing": { "$ref": "common.schema.json#/$defs/timing" },
+        "charge_s": { "type": "number", "minimum": 0, "maximum": 3, "description": "Heavy attacks only: optional hold time for the charged version." },
+        "range_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 60 },
+        "arc_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
+        "knockback_studs": { "type": "number", "minimum": 0, "maximum": 20 },
+        "poise_damage": { "type": "number", "minimum": 0, "maximum": 200 },
+        "dodge_cancel_after_s": { "type": "number", "minimum": 0, "maximum": 3, "description": "Seconds into the attack after which the player may dodge out of it." }
+      }
+    }
+  }
+}
