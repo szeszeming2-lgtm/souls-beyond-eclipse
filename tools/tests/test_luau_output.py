@@ -72,7 +72,8 @@ class GeneratedModuleTests(unittest.TestCase):
         for data_file in files:
             with self.subTest(file=data_file.rel):
                 source = luau_convert.render_module(data_file)
-                self.assertTrue(source.startswith("--!strict\n-- AUTO-GENERATED"))
+                self.assertTrue(source.startswith("--!nocheck\n-- AUTO-GENERATED"))
+                self.assertTrue(source.rstrip().endswith(":: any"))
                 expected = {k: v for k, v in data_file.data.items() if k != "$schema"}
                 self.assertTrue(same_data(read_module(source), expected))
 

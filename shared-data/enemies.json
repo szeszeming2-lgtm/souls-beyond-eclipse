@@ -8,8 +8,18 @@
       "family": "gloam_beast",
       "rank": "minion",
       "description": "A hunched shadow the size of a large dog, with a single dim ember for an eye. It hunts light.",
-      "region_ids": ["reg_akeboshi_city"],
-      "stats": { "hp_mult": 1, "attack_mult": 1, "defense_mult": 1, "poise": 30, "move_speed_studs": 16, "aggro_range_studs": 45, "leash_range_studs": 90 },
+      "region_ids": [
+        "reg_akeboshi_city"
+      ],
+      "stats": {
+        "hp_mult": 1,
+        "attack_mult": 1,
+        "defense_mult": 1,
+        "poise": 30,
+        "move_speed_studs": 16,
+        "aggro_range_studs": 45,
+        "leash_range_studs": 90
+      },
       "ai_profile": "melee_skirmisher",
       "attacks": [
         {
@@ -17,11 +27,26 @@
           "name": "Claw Swipe",
           "power": 0.9,
           "damage_type": "slash",
-          "timing": { "windup_s": 0.55, "active_s": 0.12, "recovery_s": 0.6 },
+          "timing": {
+            "windup_s": 0.55,
+            "active_s": 0.12,
+            "recovery_s": 0.6
+          },
           "range_studs": 6,
-          "area": { "shape": "cone", "radius_studs": 6, "angle_deg": 90 },
-          "avoidable_by": ["dodge", "guard", "parry"],
-          "tell": { "visual": "wind_up_pose", "audio_cue": true },
+          "area": {
+            "shape": "cone",
+            "radius_studs": 6,
+            "angle_deg": 90
+          },
+          "avoidable_by": [
+            "dodge",
+            "guard",
+            "parry"
+          ],
+          "tell": {
+            "visual": "wind_up_pose",
+            "audio_cue": true
+          },
           "knockback_studs": 1,
           "poise_damage": 15,
           "cooldown_s": 2.5
@@ -31,26 +56,57 @@
           "name": "Ember Pounce",
           "power": 1.3,
           "damage_type": "blunt",
-          "timing": { "windup_s": 0.9, "active_s": 0.3, "recovery_s": 1.0 },
+          "timing": {
+            "windup_s": 0.9,
+            "active_s": 0.3,
+            "recovery_s": 1.0
+          },
           "range_studs": 18,
-          "area": { "shape": "circle", "radius_studs": 4 },
-          "avoidable_by": ["dodge", "move_out"],
-          "tell": { "visual": "body_glow", "audio_cue": true, "unblockable_marker": true },
+          "area": {
+            "shape": "circle",
+            "radius_studs": 4
+          },
+          "avoidable_by": [
+            "dodge",
+            "move_out"
+          ],
+          "tell": {
+            "visual": "body_glow",
+            "audio_cue": true,
+            "unblockable_marker": true
+          },
           "knockback_studs": 6,
           "poise_damage": 30,
           "cooldown_s": 7
         }
       ],
-      "resistances": { "flame": 1.25, "shadow": 0.5 },
+      "resistances": {
+        "flame": 1.25,
+        "shadow": 0.5
+      },
       "rewards": {
         "xp_base": 12,
         "currency_base": 3,
         "drops": [
-          { "item_id": "mat_gloam_dust", "chance": 0.6, "qty_min": 1, "qty_max": 3 },
-          { "item_id": "mat_wick_thread", "chance": 0.08, "qty_min": 1, "qty_max": 1 }
+          {
+            "item_id": "mat_gloam_dust",
+            "chance": 0.6,
+            "qty_min": 1,
+            "qty_max": 3
+          },
+          {
+            "item_id": "mat_wick_thread",
+            "chance": 0.08,
+            "qty_min": 1,
+            "qty_max": 1
+          }
         ]
       },
-      "presentation": { "visual": "ast_enm_gloamling", "animation": "ast_anim_gloamling", "sound": "ast_sfx_gloamling" },
+      "presentation": {
+        "visual": "ast_enm_gloamling",
+        "animation": "ast_anim_gloamling",
+        "sound": "ast_sfx_gloamling"
+      },
       "dev_status": "data_only"
     },
     {
@@ -59,8 +115,18 @@
       "family": "gloam_beast",
       "rank": "boss",
       "description": "A long-limbed Gloam that swallowed every street lamp on the harbor promenade. The lamps still glow inside its ribs, which is how you see it coming.",
-      "region_ids": ["reg_akeboshi_city"],
-      "stats": { "hp_mult": 18, "attack_mult": 1.4, "defense_mult": 1.2, "poise": 400, "move_speed_studs": 20, "aggro_range_studs": 80, "leash_range_studs": 200 },
+      "region_ids": [
+        "reg_akeboshi_city"
+      ],
+      "stats": {
+        "hp_mult": 12,
+        "attack_mult": 1.4,
+        "defense_mult": 1.2,
+        "poise": 400,
+        "move_speed_studs": 20,
+        "aggro_range_studs": 80,
+        "leash_range_studs": 200
+      },
       "ai_profile": "boss_scripted",
       "attacks": [
         {
@@ -68,11 +134,26 @@
           "name": "Lamp Swipe",
           "power": 1.2,
           "damage_type": "slash",
-          "timing": { "windup_s": 0.6, "active_s": 0.15, "recovery_s": 0.7 },
+          "timing": {
+            "windup_s": 0.6,
+            "active_s": 0.15,
+            "recovery_s": 0.7
+          },
           "range_studs": 12,
-          "area": { "shape": "cone", "radius_studs": 12, "angle_deg": 120 },
-          "avoidable_by": ["dodge", "guard", "parry"],
-          "tell": { "visual": "body_glow", "audio_cue": true },
+          "area": {
+            "shape": "cone",
+            "radius_studs": 12,
+            "angle_deg": 120
+          },
+          "avoidable_by": [
+            "dodge",
+            "guard",
+            "parry"
+          ],
+          "tell": {
+            "visual": "body_glow",
+            "audio_cue": true
+          },
           "knockback_studs": 3,
           "poise_damage": 20,
           "cooldown_s": 2
@@ -82,11 +163,26 @@
           "name": "Twin Swipe",
           "power": 1.0,
           "damage_type": "slash",
-          "timing": { "windup_s": 0.5, "active_s": 0.4, "recovery_s": 0.9 },
+          "timing": {
+            "windup_s": 0.5,
+            "active_s": 0.4,
+            "recovery_s": 0.9
+          },
           "range_studs": 12,
-          "area": { "shape": "cone", "radius_studs": 12, "angle_deg": 150 },
-          "avoidable_by": ["dodge", "guard", "parry"],
-          "tell": { "visual": "wind_up_pose", "audio_cue": true },
+          "area": {
+            "shape": "cone",
+            "radius_studs": 12,
+            "angle_deg": 150
+          },
+          "avoidable_by": [
+            "dodge",
+            "guard",
+            "parry"
+          ],
+          "tell": {
+            "visual": "wind_up_pose",
+            "audio_cue": true
+          },
           "knockback_studs": 2,
           "poise_damage": 25,
           "cooldown_s": 4
@@ -96,11 +192,26 @@
           "name": "Swallowed-Light Lunge",
           "power": 1.8,
           "damage_type": "blunt",
-          "timing": { "windup_s": 0.9, "active_s": 0.35, "recovery_s": 1.4 },
+          "timing": {
+            "windup_s": 0.9,
+            "active_s": 0.35,
+            "recovery_s": 1.4
+          },
           "range_studs": 30,
-          "area": { "shape": "line", "length_studs": 30, "width_studs": 8 },
-          "avoidable_by": ["dodge", "move_out"],
-          "tell": { "visual": "ground_marker", "audio_cue": true, "unblockable_marker": true },
+          "area": {
+            "shape": "line",
+            "length_studs": 30,
+            "width_studs": 8
+          },
+          "avoidable_by": [
+            "dodge",
+            "move_out"
+          ],
+          "tell": {
+            "visual": "ground_marker",
+            "audio_cue": true,
+            "unblockable_marker": true
+          },
           "knockback_studs": 8,
           "poise_damage": 40,
           "cooldown_s": 9
@@ -110,40 +221,97 @@
           "name": "Blackout Ring",
           "power": 1.5,
           "damage_type": "shadow",
-          "timing": { "windup_s": 1.2, "active_s": 0.4, "recovery_s": 1.5 },
+          "timing": {
+            "windup_s": 1.2,
+            "active_s": 0.4,
+            "recovery_s": 1.5
+          },
           "range_studs": 24,
-          "area": { "shape": "ring", "radius_studs": 24, "width_studs": 6 },
-          "avoidable_by": ["dodge", "move_out"],
-          "tell": { "visual": "ground_marker", "audio_cue": true, "unblockable_marker": true },
+          "area": {
+            "shape": "ring",
+            "radius_studs": 24,
+            "width_studs": 6
+          },
+          "avoidable_by": [
+            "dodge",
+            "move_out"
+          ],
+          "tell": {
+            "visual": "ground_marker",
+            "audio_cue": true,
+            "unblockable_marker": true
+          },
           "knockback_studs": 4,
           "poise_damage": 30,
           "cooldown_s": 14,
-          "status_effects": [{ "status_id": "sts_dimmed", "chance": 1 }]
+          "status_effects": [
+            {
+              "status_id": "sts_dimmed",
+              "chance": 1
+            }
+          ]
         },
         {
           "id": "spat_lanterns",
           "name": "Spat Lanterns",
           "power": 0.8,
           "damage_type": "flame",
-          "timing": { "windup_s": 0.7, "active_s": 1.2, "recovery_s": 1.0 },
+          "timing": {
+            "windup_s": 0.7,
+            "active_s": 1.2,
+            "recovery_s": 1.0
+          },
           "range_studs": 50,
-          "area": { "shape": "circle", "radius_studs": 5 },
-          "avoidable_by": ["dodge", "guard", "move_out"],
-          "tell": { "visual": "ground_marker", "audio_cue": true },
+          "area": {
+            "shape": "circle",
+            "radius_studs": 5
+          },
+          "avoidable_by": [
+            "dodge",
+            "guard",
+            "move_out"
+          ],
+          "tell": {
+            "visual": "ground_marker",
+            "audio_cue": true
+          },
           "knockback_studs": 1,
           "poise_damage": 10,
           "cooldown_s": 10,
-          "status_effects": [{ "status_id": "sts_burning", "chance": 0.5 }]
+          "status_effects": [
+            {
+              "status_id": "sts_burning",
+              "chance": 0.5
+            }
+          ]
         }
       ],
-      "resistances": { "shadow": 0.5, "light": 1.5 },
+      "resistances": {
+        "shadow": 0.5,
+        "light": 1.5
+      },
       "rewards": {
         "xp_base": 600,
         "currency_base": 150,
         "drops": [
-          { "item_id": "mat_eclipse_ember", "chance": 1, "qty_min": 1, "qty_max": 1 },
-          { "item_id": "mat_warden_steel", "chance": 0.5, "qty_min": 1, "qty_max": 2 },
-          { "item_id": "mat_wick_thread", "chance": 1, "qty_min": 3, "qty_max": 6 }
+          {
+            "item_id": "mat_eclipse_ember",
+            "chance": 1,
+            "qty_min": 1,
+            "qty_max": 1
+          },
+          {
+            "item_id": "mat_warden_steel",
+            "chance": 0.5,
+            "qty_min": 1,
+            "qty_max": 2
+          },
+          {
+            "item_id": "mat_wick_thread",
+            "chance": 1,
+            "qty_min": 3,
+            "qty_max": 6
+          }
         ]
       },
       "boss": {
@@ -154,17 +322,45 @@
         "checkpoint_each_phase": true,
         "suggested_level": 15,
         "phases": [
-          { "id": "hungry", "name": "Hungry", "starts_at_hp": 1, "attack_ids": ["lamp_swipe", "twin_swipe", "light_lunge"], "speed_mult": 1, "transition_invulnerable_s": 0 },
+          {
+            "id": "hungry",
+            "name": "Hungry",
+            "starts_at_hp": 1,
+            "attack_ids": [
+              "lamp_swipe",
+              "twin_swipe",
+              "light_lunge"
+            ],
+            "speed_mult": 1,
+            "transition_invulnerable_s": 0
+          },
           {
             "id": "lights_out",
             "name": "Lights Out",
             "starts_at_hp": 0.6,
-            "attack_ids": ["lamp_swipe", "twin_swipe", "light_lunge", "blackout_ring"],
+            "attack_ids": [
+              "lamp_swipe",
+              "twin_swipe",
+              "light_lunge",
+              "blackout_ring"
+            ],
             "speed_mult": 1.1,
             "transition_invulnerable_s": 2,
             "notes": "Arena lamps dim but the boss's ribs glow brighter, so it stays easy to see. Never full-screen darkness."
           },
-          { "id": "overfed", "name": "Overfed", "starts_at_hp": 0.25, "attack_ids": ["twin_swipe", "light_lunge", "blackout_ring", "spat_lanterns"], "speed_mult": 1.15, "transition_invulnerable_s": 2 }
+          {
+            "id": "overfed",
+            "name": "Overfed",
+            "starts_at_hp": 0.25,
+            "attack_ids": [
+              "twin_swipe",
+              "light_lunge",
+              "blackout_ring",
+              "spat_lanterns"
+            ],
+            "speed_mult": 1.15,
+            "transition_invulnerable_s": 2
+          }
         ],
         "assist_tips": [
           "The Lunge cannot be blocked: watch for the orange line on the ground and dodge sideways.",
@@ -172,7 +368,11 @@
           "Parrying a Lamp Swipe refills spirit fast. Spend it on Wickflare."
         ]
       },
-      "presentation": { "visual": "ast_enm_lampeater", "animation": "ast_anim_lampeater", "sound": "ast_sfx_lampeater" },
+      "presentation": {
+        "visual": "ast_enm_lampeater",
+        "animation": "ast_anim_lampeater",
+        "sound": "ast_sfx_lampeater"
+      },
       "dev_status": "data_only"
     }
   ]

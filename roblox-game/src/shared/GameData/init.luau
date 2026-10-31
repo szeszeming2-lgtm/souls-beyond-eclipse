@@ -31,7 +31,8 @@ return freeze({
 	}),
 	Quests = require(script.Quests),
 	Regions = require(script.Regions),
+	Settings = require(script.Settings),
 	SkillTrees = require(script.SkillTrees),
 	StatusEffects = require(script.StatusEffects),
-	_meta = freeze({ generator = "tools/convert_to_luau.py", source_digest = "423bea50ea892915" }),
+	_meta = freeze({ generator = "tools/convert_to_luau.py", source_digest = "4c8858d06257dcb8" }),
 })

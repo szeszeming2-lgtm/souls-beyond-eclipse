@@ -30,6 +30,7 @@ REQUIRED_INPUT_ACTIONS = (
 SINGLETON_SCHEMAS = (
     "combat.schema.json", "progression.schema.json", "xp_table.schema.json",
     "difficulty.schema.json", "input_actions.schema.json", "customization.schema.json",
+    "settings.schema.json",
 )
 COLLECTION_SCHEMAS = (
     "factions.schema.json", "archetypes.schema.json", "skill_trees.schema.json",
@@ -344,6 +345,8 @@ def progression_rules(ctx: Ctx) -> None:
     data = progression.data
     where = progression.rel
     cap = data["level_cap"]
+    if data["content_level_cap"] > cap:
+        ctx.error(where, f"content_level_cap {data['content_level_cap']} is above the level cap {cap}")
 
     bands = sorted(data["level_bands"], key=lambda b: b["min"])
     if bands[0]["min"] != 1:
@@ -565,9 +568,23 @@ def _expand(inputs: list[str]) -> list[str]:
     return out
 
 
+PLATFORMS = ("roblox", "pc")
+DEVICES = ("keyboard_mouse", "gamepad", "touch")
+
+
+def effective_actions(actions: list[dict], platform: str) -> list[dict]:
+    """Actions with that platform's binding overrides applied."""
+    out = []
+    for action in actions:
+        bindings = dict(action["bindings"])
+        bindings.update(action.get("platform_overrides", {}).get(platform, {}))
+        out.append({**action, "bindings": bindings})
+    return out
+
+
 def _input_conflicts(actions: list[dict]) -> list[str]:
     problems = []
-    for device in ("keyboard_mouse", "gamepad", "touch"):
+    for device in DEVICES:
         for context in ("gameplay", "menu"):
             owners: dict[str, str] = {}
             for action in actions:
@@ -596,8 +613,17 @@ def input_rules(ctx: Ctx) -> None:
     for required in REQUIRED_INPUT_ACTIONS:
         if required not in ids:
             ctx.error(where, f"missing required action {required!r}")
-    for problem in _input_conflicts(actions):
-        ctx.error(where, f"binding conflict: {problem}")
+    for platform in PLATFORMS:
+        effective = effective_actions(actions, platform)
+        for problem in _input_conflicts(effective):
+            ctx.error(where, f"binding conflict on {platform}: {problem}")
+        reserved = set(data["platform_reserved"][platform])
+        for action in effective:
+            for device in DEVICES:
+                usable = [n for n in action["bindings"][device] if n not in reserved]
+                if not usable:
+                    ctx.error(where, f"action {action['id']!r} has no usable {device} binding on {platform} "
+                                     f"(all of {action['bindings'][device]} are reserved there)")
     defs = ctx.store.docs["input_actions.schema.json"]["$defs"]
     valid = {
         "keyboard_mouse": set(defs["keyboard_mouse_input"]["enum"]),
@@ -618,8 +644,9 @@ def input_rules(ctx: Ctx) -> None:
                 if name not in valid[override["device"]]:
                     ctx.error(where, f"{label}: {name!r} is not a valid {override['device']} input")
             patched[override["action_id"]]["bindings"][override["device"]] = override["bindings"]
-        for problem in _input_conflicts(list(patched.values())):
-            ctx.error(where, f"preset {preset['id']!r} creates a binding conflict: {problem}")
+        for platform in PLATFORMS:
+            for problem in _input_conflicts(effective_actions(list(patched.values()), platform)):
+                ctx.error(where, f"preset {preset['id']!r} creates a binding conflict on {platform}: {problem}")
     for group in ("gamepad", "touch"):
         settings = data[group]
         prefix = "sensitivity" if group == "gamepad" else "ui_scale"
@@ -706,3 +733,80 @@ def asset_rules(ctx: Ctx) -> None:
     for where, asset in ctx.entries("assets.schema.json"):
         if asset["id"] not in used and asset["kind"] not in GLOBAL_ASSET_KINDS:
             ctx.warn(where, "asset is not used by anything")
+
+
+# --------------------------------------------------------------------------- settings
+@rule
+def settings_rules(ctx: Ctx) -> None:
+    settings_file = ctx.single("settings.schema.json")
+    if settings_file is None:
+        return
+    data = settings_file.data
+    where = settings_file.rel
+    tab_ids = [t["id"] for t in data["tabs"]]
+    if len(set(tab_ids)) != len(tab_ids):
+        ctx.error(where, f"tab ids repeat: {tab_ids}")
+    ids = [s["id"] for s in data["settings"]]
+    for ident in sorted({i for i in ids if ids.count(i) > 1}):
+        ctx.error(where, f"setting id {ident!r} is used more than once")
+    used_tabs = set()
+    by_id = {}
+    for setting in data["settings"]:
+        label = f"setting {setting['id']!r}"
+        by_id[setting["id"]] = setting
+        used_tabs.add(setting["tab"])
+        if setting["tab"] not in tab_ids:
+            ctx.error(where, f"{label} uses unknown tab {setting['tab']!r}")
+        if setting["kind"] == "slider":
+            lo, hi, step, default = setting["min"], setting["max"], setting["step"], setting["default"]
+            if lo >= hi:
+                ctx.error(where, f"{label}: min must be below max")
+            if not lo <= default <= hi:
+                ctx.error(where, f"{label}: default {default} is outside {lo}-{hi}")
+            steps = (default - lo) / step
+            if abs(steps - round(steps)) > 1e-6:
+                ctx.error(where, f"{label}: default {default} is not on the {step} step grid from {lo}")
+        if setting["kind"] == "choice":
+            values = [o["value"] for o in setting["options"]]
+            if len(set(values)) != len(values):
+                ctx.error(where, f"{label}: option values repeat")
+            if setting["default"] not in values:
+                ctx.error(where, f"{label}: default {setting['default']!r} is not one of its options")
+    for tab in tab_ids:
+        if tab not in used_tabs:
+            ctx.warn(where, f"tab {tab!r} has no settings")
+
+    # Defaults that mirror values in other files must agree with them.
+    def expect(setting_id: str, field_name: str, value: Any, source: str) -> None:
+        setting = by_id.get(setting_id)
+        if setting is None:
+            ctx.error(where, f"missing required setting {setting_id!r}")
+        elif setting.get(field_name) != value:
+            ctx.error(where, f"setting {setting_id!r} {field_name} is {setting.get(field_name)!r} but {source} says {value!r}")
+
+    combat = ctx.single("combat.schema.json")
+    difficulty = ctx.single("difficulty.schema.json")
+    inputs = ctx.single("input_actions.schema.json")
+    if combat:
+        expect("damage_numbers", "default", combat.data["feedback"]["damage_numbers_default"], "combat.json")
+        expect("camera_shake", "default", combat.data["feedback"]["camera_shake_default"], "combat.json")
+    if difficulty:
+        expect("difficulty", "default", difficulty.data["default_mode"], "difficulty.json")
+        if "difficulty" in by_id:
+            options = sorted(o["value"] for o in by_id["difficulty"]["options"])
+            if options != sorted(m["id"] for m in difficulty.data["modes"]):
+                ctx.error(where, "setting 'difficulty' options must match the modes in difficulty.json")
+    if inputs:
+        pad = inputs.data["gamepad"]
+        expect("gamepad_sensitivity", "default", pad["sensitivity_default"], "input_actions.json")
+        expect("gamepad_sensitivity", "min", pad["sensitivity_min"], "input_actions.json")
+        expect("gamepad_sensitivity", "max", pad["sensitivity_max"], "input_actions.json")
+        expect("vibration", "default", pad["vibration_default"], "input_actions.json")
+        touch = inputs.data["touch"]
+        expect("touch_ui_scale", "default", touch["ui_scale_default"], "input_actions.json")
+        expect("touch_ui_scale", "min", touch["ui_scale_min"], "input_actions.json")
+        expect("touch_ui_scale", "max", touch["ui_scale_max"], "input_actions.json")
+        if "touch_layout" in by_id:
+            options = [o["value"] for o in by_id["touch_layout"]["options"]]
+            if sorted(options) != sorted(touch["layouts"]):
+                ctx.error(where, "setting 'touch_layout' options must match touch.layouts in input_actions.json")

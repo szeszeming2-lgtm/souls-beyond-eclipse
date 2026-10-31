@@ -289,3 +289,29 @@ class WarningTests(RuleTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlatformAndSettingsTests(RuleTestCase):
+    def test_roblox_reserved_keys_cannot_be_the_only_binding(self):
+        def reserve(d):
+            pause = find(d["actions"], "pause")
+            pause["platform_overrides"]["roblox"]["keyboard_mouse"] = ["Escape"]
+        with DataSandbox() as box:
+            box.edit("input_actions.json", reserve)
+            self.assert_error(box.validate(), "'pause'", "no usable keyboard_mouse binding on roblox")
+
+    def test_settings_defaults_must_match_the_game_rules(self):
+        with DataSandbox() as box:
+            box.edit("settings.json", lambda d: find(d["settings"], "damage_numbers").update(default=False))
+            self.assert_error(box.validate(), "'damage_numbers'", "combat.json says")
+
+    def test_slider_default_must_sit_on_its_step_grid(self):
+        with DataSandbox() as box:
+            box.edit("settings.json", lambda d: find(d["settings"], "camera_shake").update(default=0.65))
+            report = box.validate()
+            self.assert_error(report, "'camera_shake'", "step grid")
+
+    def test_settings_need_a_known_tab(self):
+        with DataSandbox() as box:
+            box.edit("settings.json", lambda d: find(d["settings"], "language").update(tab="extras"))
+            self.assert_error(box.validate(), "unknown tab 'extras'")

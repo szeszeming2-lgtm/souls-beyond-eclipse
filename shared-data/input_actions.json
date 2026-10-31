@@ -2,25 +2,390 @@
   "$schema": "./schemas/input_actions.schema.json",
   "version": 1,
   "actions": [
-    { "id": "move", "label": "Move", "context": "gameplay", "kind": "axis2d", "bindings": { "keyboard_mouse": ["Composite:WASD"], "gamepad": ["Thumbstick1"], "touch": ["TouchStickMove"] }, "remappable": true },
-    { "id": "camera", "label": "Camera", "context": "gameplay", "kind": "axis2d", "bindings": { "keyboard_mouse": ["MouseDelta"], "gamepad": ["Thumbstick2"], "touch": ["TouchCameraSwipe"] }, "remappable": false },
-    { "id": "light_attack", "label": "Light Attack", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["MouseButton1"], "gamepad": ["ButtonX"], "touch": ["TouchButtonAttack"] }, "remappable": true },
-    { "id": "heavy_attack", "label": "Heavy Attack", "context": "gameplay", "kind": "button", "press": "tap_or_hold", "bindings": { "keyboard_mouse": ["MouseButton2"], "gamepad": ["ButtonY"], "touch": ["TouchButtonHeavy"] }, "remappable": true },
-    { "id": "guard", "label": "Guard / Parry", "context": "gameplay", "kind": "button", "press": "hold", "bindings": { "keyboard_mouse": ["C"], "gamepad": ["ButtonL1"], "touch": ["TouchButtonGuard"] }, "remappable": true },
-    { "id": "jump", "label": "Jump", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Space"], "gamepad": ["ButtonA"], "touch": ["TouchButtonJump"] }, "remappable": true },
-    { "id": "dodge_sprint", "label": "Dodge (tap) / Sprint (hold)", "context": "gameplay", "kind": "button", "press": "tap_or_hold", "bindings": { "keyboard_mouse": ["LeftShift"], "gamepad": ["ButtonB"], "touch": ["TouchButtonDodge"] }, "remappable": true },
-    { "id": "ability_1", "label": "Weapon Special", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Q"], "gamepad": ["ButtonR1"], "touch": ["TouchButtonAbility1"] }, "remappable": true },
-    { "id": "ability_2", "label": "Ability 2", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["E"], "gamepad": ["ButtonR2"], "touch": ["TouchButtonAbility2"] }, "remappable": true },
-    { "id": "ability_3", "label": "Ability 3", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["R"], "gamepad": ["ButtonL2"], "touch": ["TouchButtonAbility3"] }, "remappable": true },
-    { "id": "ultimate", "label": "Ultimate", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["F"], "gamepad": ["DPadUp"], "touch": ["TouchButtonUltimate"] }, "remappable": true },
-    { "id": "lock_on", "label": "Lock On", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Tab"], "gamepad": ["ButtonR3"], "touch": ["TouchButtonLockOn"] }, "remappable": true },
-    { "id": "interact", "label": "Interact", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["G"], "gamepad": ["DPadDown"], "touch": ["TouchButtonInteract"] }, "remappable": true },
-    { "id": "pause", "label": "Pause", "context": "gameplay", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Escape"], "gamepad": ["ButtonStart"], "touch": ["TouchButtonPause"] }, "remappable": false },
-    { "id": "menu_navigate", "label": "Navigate", "context": "menu", "kind": "axis2d", "bindings": { "keyboard_mouse": ["Composite:Arrows", "Composite:WASD"], "gamepad": ["Composite:DPad", "Thumbstick1"], "touch": ["TouchTap"] }, "remappable": false },
-    { "id": "menu_confirm", "label": "Confirm", "context": "menu", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Return", "Space"], "gamepad": ["ButtonA"], "touch": ["TouchTap"] }, "remappable": false },
-    { "id": "menu_back", "label": "Back", "context": "menu", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Escape", "Backspace"], "gamepad": ["ButtonB"], "touch": ["TouchButtonBack"] }, "remappable": false },
-    { "id": "menu_tab_next", "label": "Next Tab", "context": "menu", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["E"], "gamepad": ["ButtonR1"], "touch": ["TouchTap"] }, "remappable": false },
-    { "id": "menu_tab_prev", "label": "Previous Tab", "context": "menu", "kind": "button", "press": "tap", "bindings": { "keyboard_mouse": ["Q"], "gamepad": ["ButtonL1"], "touch": ["TouchTap"] }, "remappable": false }
+    {
+      "id": "move",
+      "label": "Move",
+      "context": "gameplay",
+      "kind": "axis2d",
+      "bindings": {
+        "keyboard_mouse": [
+          "Composite:WASD"
+        ],
+        "gamepad": [
+          "Thumbstick1"
+        ],
+        "touch": [
+          "TouchStickMove"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "camera",
+      "label": "Camera",
+      "context": "gameplay",
+      "kind": "axis2d",
+      "bindings": {
+        "keyboard_mouse": [
+          "MouseDelta"
+        ],
+        "gamepad": [
+          "Thumbstick2"
+        ],
+        "touch": [
+          "TouchCameraSwipe"
+        ]
+      },
+      "remappable": false
+    },
+    {
+      "id": "light_attack",
+      "label": "Light Attack",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "MouseButton1"
+        ],
+        "gamepad": [
+          "ButtonX"
+        ],
+        "touch": [
+          "TouchButtonAttack"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "heavy_attack",
+      "label": "Heavy Attack",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap_or_hold",
+      "bindings": {
+        "keyboard_mouse": [
+          "MouseButton2"
+        ],
+        "gamepad": [
+          "ButtonY"
+        ],
+        "touch": [
+          "TouchButtonHeavy"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "guard",
+      "label": "Guard / Parry",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "hold",
+      "bindings": {
+        "keyboard_mouse": [
+          "C"
+        ],
+        "gamepad": [
+          "ButtonL1"
+        ],
+        "touch": [
+          "TouchButtonGuard"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "jump",
+      "label": "Jump",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Space"
+        ],
+        "gamepad": [
+          "ButtonA"
+        ],
+        "touch": [
+          "TouchButtonJump"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "dodge_sprint",
+      "label": "Dodge (tap) / Sprint (hold)",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap_or_hold",
+      "bindings": {
+        "keyboard_mouse": [
+          "LeftShift"
+        ],
+        "gamepad": [
+          "ButtonB"
+        ],
+        "touch": [
+          "TouchButtonDodge"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "ability_1",
+      "label": "Weapon Special",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Q"
+        ],
+        "gamepad": [
+          "ButtonR1"
+        ],
+        "touch": [
+          "TouchButtonAbility1"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "ability_2",
+      "label": "Ability 2",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "E"
+        ],
+        "gamepad": [
+          "ButtonR2"
+        ],
+        "touch": [
+          "TouchButtonAbility2"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "ability_3",
+      "label": "Ability 3",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "R"
+        ],
+        "gamepad": [
+          "ButtonL2"
+        ],
+        "touch": [
+          "TouchButtonAbility3"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "ultimate",
+      "label": "Ultimate",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "F"
+        ],
+        "gamepad": [
+          "DPadUp"
+        ],
+        "touch": [
+          "TouchButtonUltimate"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "lock_on",
+      "label": "Lock On",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Tab"
+        ],
+        "gamepad": [
+          "ButtonR3"
+        ],
+        "touch": [
+          "TouchButtonLockOn"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "interact",
+      "label": "Interact",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "G"
+        ],
+        "gamepad": [
+          "DPadDown"
+        ],
+        "touch": [
+          "TouchButtonInteract"
+        ]
+      },
+      "remappable": true
+    },
+    {
+      "id": "pause",
+      "label": "Pause",
+      "context": "gameplay",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Escape"
+        ],
+        "gamepad": [
+          "ButtonStart"
+        ],
+        "touch": [
+          "TouchButtonPause"
+        ]
+      },
+      "remappable": false,
+      "platform_overrides": {
+        "roblox": {
+          "keyboard_mouse": [
+            "P"
+          ],
+          "gamepad": [
+            "ButtonSelect"
+          ]
+        }
+      }
+    },
+    {
+      "id": "menu_navigate",
+      "label": "Navigate",
+      "context": "menu",
+      "kind": "axis2d",
+      "bindings": {
+        "keyboard_mouse": [
+          "Composite:Arrows",
+          "Composite:WASD"
+        ],
+        "gamepad": [
+          "Composite:DPad",
+          "Thumbstick1"
+        ],
+        "touch": [
+          "TouchTap"
+        ]
+      },
+      "remappable": false
+    },
+    {
+      "id": "menu_confirm",
+      "label": "Confirm",
+      "context": "menu",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Return",
+          "Space"
+        ],
+        "gamepad": [
+          "ButtonA"
+        ],
+        "touch": [
+          "TouchTap"
+        ]
+      },
+      "remappable": false
+    },
+    {
+      "id": "menu_back",
+      "label": "Back",
+      "context": "menu",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Escape",
+          "Backspace"
+        ],
+        "gamepad": [
+          "ButtonB"
+        ],
+        "touch": [
+          "TouchButtonBack"
+        ]
+      },
+      "remappable": false,
+      "platform_overrides": {
+        "roblox": {
+          "keyboard_mouse": [
+            "Backspace",
+            "P"
+          ],
+          "gamepad": [
+            "ButtonB",
+            "ButtonSelect"
+          ]
+        }
+      }
+    },
+    {
+      "id": "menu_tab_next",
+      "label": "Next Tab",
+      "context": "menu",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "E"
+        ],
+        "gamepad": [
+          "ButtonR1"
+        ],
+        "touch": [
+          "TouchTap"
+        ]
+      },
+      "remappable": false
+    },
+    {
+      "id": "menu_tab_prev",
+      "label": "Previous Tab",
+      "context": "menu",
+      "kind": "button",
+      "press": "tap",
+      "bindings": {
+        "keyboard_mouse": [
+          "Q"
+        ],
+        "gamepad": [
+          "ButtonL1"
+        ],
+        "touch": [
+          "TouchTap"
+        ]
+      },
+      "remappable": false
+    }
   ],
   "presets": [
     {
@@ -28,11 +393,46 @@
       "label": "Right-click guards",
       "description": "Right mouse button guards and parries; heavy attack moves to C.",
       "overrides": [
-        { "action_id": "guard", "device": "keyboard_mouse", "bindings": ["MouseButton2"] },
-        { "action_id": "heavy_attack", "device": "keyboard_mouse", "bindings": ["C"] }
+        {
+          "action_id": "guard",
+          "device": "keyboard_mouse",
+          "bindings": [
+            "MouseButton2"
+          ]
+        },
+        {
+          "action_id": "heavy_attack",
+          "device": "keyboard_mouse",
+          "bindings": [
+            "C"
+          ]
+        }
       ]
     }
   ],
-  "gamepad": { "sensitivity_default": 1, "sensitivity_min": 0.2, "sensitivity_max": 3, "vibration_default": true },
-  "touch": { "ui_scale_default": 1, "ui_scale_min": 0.75, "ui_scale_max": 1.5, "layouts": ["standard", "one_handed_left", "one_handed_right"] }
+  "platform_reserved": {
+    "roblox": [
+      "Escape",
+      "ButtonStart",
+      "F9",
+      "F11"
+    ],
+    "pc": []
+  },
+  "gamepad": {
+    "sensitivity_default": 1,
+    "sensitivity_min": 0.2,
+    "sensitivity_max": 3,
+    "vibration_default": true
+  },
+  "touch": {
+    "ui_scale_default": 1,
+    "ui_scale_min": 0.75,
+    "ui_scale_max": 1.5,
+    "layouts": [
+      "standard",
+      "one_handed_left",
+      "one_handed_right"
+    ]
+  }
 }

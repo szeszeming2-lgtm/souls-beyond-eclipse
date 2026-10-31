@@ -2,110 +2,378 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Global combat rules and fairness limits",
   "type": "object",
-  "required": ["$schema", "version", "damage", "spirit", "dodge", "guard", "poise", "crowd_control", "readability", "lock_on", "feedback"],
+  "required": [
+    "$schema",
+    "version",
+    "damage",
+    "spirit",
+    "dodge",
+    "guard",
+    "poise",
+    "crowd_control",
+    "readability",
+    "lock_on",
+    "feedback",
+    "movement",
+    "recovery"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
-    "version": { "$ref": "common.schema.json#/$defs/file_version" },
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/file_version"
+    },
     "damage": {
       "type": "object",
       "description": "damage = attack x power x weapon_factor x mitigation x level_gap x difficulty x crit. mitigation = 1 - defense / (defense + defense_constant x reward_scale(attacker level)).",
-      "required": ["defense_constant", "level_gap_per_level", "level_gap_min", "level_gap_max", "crit_chance_base", "crit_multiplier", "variance", "min_damage"],
+      "required": [
+        "defense_constant",
+        "level_gap_per_level",
+        "level_gap_min",
+        "level_gap_max",
+        "crit_chance_base",
+        "crit_multiplier",
+        "variance",
+        "min_damage"
+      ],
       "additionalProperties": false,
       "properties": {
-        "defense_constant": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
-        "level_gap_per_level": { "type": "number", "minimum": 0, "maximum": 0.2 },
-        "level_gap_min": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-        "level_gap_max": { "type": "number", "minimum": 1, "maximum": 5 },
-        "crit_chance_base": { "$ref": "common.schema.json#/$defs/fraction" },
-        "crit_multiplier": { "type": "number", "minimum": 1, "maximum": 5 },
-        "variance": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Random +/- spread. 0 keeps damage numbers predictable." },
-        "min_damage": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "defense_constant": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100000
+        },
+        "level_gap_per_level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.2
+        },
+        "level_gap_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "level_gap_max": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "crit_chance_base": {
+          "$ref": "common.schema.json#/$defs/fraction"
+        },
+        "crit_multiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "variance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.2,
+          "description": "Random +/- spread. 0 keeps damage numbers predictable."
+        },
+        "min_damage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
       }
     },
     "spirit": {
       "type": "object",
-      "required": ["regen_per_s", "gain_on_hit", "gain_on_hit_taken", "gain_on_parry", "gain_on_perfect_dodge"],
+      "required": [
+        "regen_per_s",
+        "gain_on_hit",
+        "gain_on_hit_taken",
+        "gain_on_parry",
+        "gain_on_perfect_dodge"
+      ],
       "additionalProperties": false,
       "properties": {
-        "regen_per_s": { "type": "number", "minimum": 0, "maximum": 100 },
-        "gain_on_hit": { "type": "number", "minimum": 0, "maximum": 100 },
-        "gain_on_hit_taken": { "type": "number", "minimum": 0, "maximum": 100 },
-        "gain_on_parry": { "type": "number", "minimum": 0, "maximum": 100 },
-        "gain_on_perfect_dodge": { "type": "number", "minimum": 0, "maximum": 100 }
+        "regen_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "gain_on_hit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "gain_on_hit_taken": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "gain_on_parry": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "gain_on_perfect_dodge": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
       }
     },
     "dodge": {
       "type": "object",
-      "required": ["perfect_window_s", "chain_limit", "chain_cooldown_s"],
+      "required": [
+        "perfect_window_s",
+        "chain_limit",
+        "chain_cooldown_s"
+      ],
       "additionalProperties": false,
       "properties": {
-        "perfect_window_s": { "type": "number", "minimum": 0, "maximum": 1 },
-        "chain_limit": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Dodges allowed back to back before a short cooldown." },
-        "chain_cooldown_s": { "type": "number", "minimum": 0, "maximum": 5 }
+        "perfect_window_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "chain_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Dodges allowed back to back before a short cooldown."
+        },
+        "chain_cooldown_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        }
       }
     },
     "guard": {
       "type": "object",
-      "required": ["guard_meter_max", "guard_meter_regen_per_s", "guard_break_stagger_s"],
+      "required": [
+        "guard_meter_max",
+        "guard_meter_regen_per_s",
+        "guard_break_stagger_s"
+      ],
       "additionalProperties": false,
       "properties": {
-        "guard_meter_max": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
-        "guard_meter_regen_per_s": { "type": "number", "minimum": 0, "maximum": 1000 },
-        "guard_break_stagger_s": { "type": "number", "minimum": 0, "maximum": 3 }
+        "guard_meter_max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000
+        },
+        "guard_meter_regen_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "guard_break_stagger_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        }
       }
     },
     "poise": {
       "type": "object",
-      "required": ["player_poise", "poise_regen_delay_s", "stagger_s", "stagger_immunity_s"],
+      "required": [
+        "player_poise",
+        "poise_regen_delay_s",
+        "stagger_s",
+        "stagger_immunity_s"
+      ],
       "additionalProperties": false,
       "properties": {
-        "player_poise": { "type": "number", "minimum": 0, "maximum": 1000 },
-        "poise_regen_delay_s": { "type": "number", "minimum": 0, "maximum": 10 },
-        "stagger_s": { "type": "number", "minimum": 0, "maximum": 3 },
-        "stagger_immunity_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "After a stagger the player cannot be staggered again for this long. Stops stun-lock loops." }
+        "player_poise": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "poise_regen_delay_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "stagger_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "stagger_immunity_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "After a stagger the player cannot be staggered again for this long. Stops stun-lock loops."
+        }
       }
     },
     "crowd_control": {
       "type": "object",
       "description": "Diminishing returns: each hard crowd-control effect in the window lasts less, then the target is briefly immune.",
-      "required": ["max_hard_cc_s", "diminishing_window_s", "diminishing_multipliers", "immunity_s"],
+      "required": [
+        "max_hard_cc_s",
+        "diminishing_window_s",
+        "diminishing_multipliers",
+        "immunity_s"
+      ],
       "additionalProperties": false,
       "properties": {
-        "max_hard_cc_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
-        "diminishing_window_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 60 },
-        "diminishing_multipliers": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "common.schema.json#/$defs/fraction" } },
-        "immunity_s": { "type": "number", "minimum": 0, "maximum": 30 }
+        "max_hard_cc_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "diminishing_window_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 60
+        },
+        "diminishing_multipliers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "$ref": "common.schema.json#/$defs/fraction"
+          }
+        },
+        "immunity_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30
+        }
       }
     },
     "readability": {
       "type": "object",
-      "required": ["min_telegraph_s", "min_unblockable_telegraph_s", "max_attackers_per_player", "max_knockback_studs"],
+      "required": [
+        "min_telegraph_s",
+        "min_unblockable_telegraph_s",
+        "max_attackers_per_player",
+        "max_knockback_studs"
+      ],
       "additionalProperties": false,
       "properties": {
-        "min_telegraph_s": { "type": "number", "minimum": 0.1, "maximum": 3, "description": "No enemy attack may wind up faster than this on ANY difficulty." },
-        "min_unblockable_telegraph_s": { "type": "number", "minimum": 0.1, "maximum": 3 },
-        "max_attackers_per_player": { "type": "integer", "minimum": 1, "maximum": 8, "description": "Default attack-token count (difficulty can change it)." },
-        "max_knockback_studs": { "type": "number", "minimum": 0, "maximum": 40 }
+        "min_telegraph_s": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3,
+          "description": "No enemy attack may wind up faster than this on ANY difficulty."
+        },
+        "min_unblockable_telegraph_s": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3
+        },
+        "max_attackers_per_player": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Default attack-token count (difficulty can change it)."
+        },
+        "max_knockback_studs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40
+        }
       }
     },
     "lock_on": {
       "type": "object",
-      "required": ["range_studs", "break_range_studs"],
+      "required": [
+        "range_studs",
+        "break_range_studs"
+      ],
       "additionalProperties": false,
       "properties": {
-        "range_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
-        "break_range_studs": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 }
+        "range_studs": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 500
+        },
+        "break_range_studs": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000
+        }
       }
     },
     "feedback": {
       "type": "object",
-      "required": ["damage_numbers_default", "hitstop_s", "camera_shake_default"],
+      "required": [
+        "damage_numbers_default",
+        "hitstop_s",
+        "camera_shake_default"
+      ],
       "additionalProperties": false,
       "properties": {
-        "damage_numbers_default": { "type": "boolean" },
-        "hitstop_s": { "type": "number", "minimum": 0, "maximum": 0.3 },
-        "camera_shake_default": { "$ref": "common.schema.json#/$defs/fraction" }
+        "damage_numbers_default": {
+          "type": "boolean"
+        },
+        "hitstop_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3
+        },
+        "camera_shake_default": {
+          "$ref": "common.schema.json#/$defs/fraction"
+        }
+      }
+    },
+    "movement": {
+      "type": "object",
+      "required": [
+        "walk_speed",
+        "sprint_speed",
+        "guard_walk_speed",
+        "jump_power"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "walk_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "sprint_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "guard_walk_speed": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "jump_power": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "description": "Health comes back on its own once you are out of combat. input_buffer_s: an attack pressed this close to the end of the previous one is queued instead of dropped.",
+      "required": [
+        "out_of_combat_delay_s",
+        "regen_fraction_per_s",
+        "input_buffer_s"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "out_of_combat_delay_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "regen_fraction_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "input_buffer_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     }
   }

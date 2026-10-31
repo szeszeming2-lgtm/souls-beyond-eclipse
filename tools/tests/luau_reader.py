@@ -21,7 +21,7 @@ _TOKEN = re.compile(
   | (?P<number>-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)
   | (?P<string>"(?:[^"\\\n]|\\.)*")
   | (?P<name>[A-Za-z_][A-Za-z0-9_]*)
-  | (?P<punct>[{}()\[\],=.])
+  | (?P<punct>::|[{}()\[\],=.])
     """,
     re.VERBOSE,
 )
@@ -146,6 +146,9 @@ def read_module(source: str):
         raise LuauReadError("module must start with 'local freeze = table.freeze' then 'return'")
     parser = _Parser(tokens[len(expected_prelude):])
     value = parser.expr()
+    if parser.peek()[1] == "::":  # optional type cast: "return freeze({...}) :: any"
+        parser.take("::")
+        parser.take("any")
     if parser.peek()[0] != "eof":
         raise LuauReadError(f"unexpected text after the returned value: {parser.peek()[1]!r}")
     return value

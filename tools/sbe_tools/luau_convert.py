@@ -33,8 +33,8 @@ def module_parts(rel: str) -> tuple[str, ...]:
     return tuple(pascal(p) for p in pieces)
 
 
-def _header(lines: list[str]) -> str:
-    return "\n".join(["--!strict", f"-- {GENERATED_MARKER}. DO NOT EDIT BY HAND."] + [f"-- {line}" for line in lines]) + "\n"
+def _header(lines: list[str], mode: str = "strict") -> str:
+    return "\n".join([f"--!{mode}", f"-- {GENERATED_MARKER}. DO NOT EDIT BY HAND."] + [f"-- {line}" for line in lines]) + "\n"
 
 
 def render_module(data_file: DataFile) -> str:
@@ -44,10 +44,12 @@ def render_module(data_file: DataFile) -> str:
         [
             f"Source: shared-data/{data_file.rel} (sha256 {digest})",
             "Change the JSON file, then run: python3 tools/convert_to_luau.py",
-        ]
+            "Not type-checked (entries have different shapes); game code reads it through Shared/Data.",
+        ],
+        mode="nocheck",
     )
     body = to_luau(payload, 0, data_file.rel)
-    return f"{header}\nlocal {FREEZE} = table.freeze\n\nreturn {body}\n"
+    return f"{header}\nlocal {FREEZE} = table.freeze\n\nreturn {body} :: any\n"
 
 
 def render_index(modules: dict[tuple[str, ...], DataFile]) -> str:
