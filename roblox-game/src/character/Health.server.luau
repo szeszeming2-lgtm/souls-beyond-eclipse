@@ -1,0 +1,4 @@
+--!strict
+-- Replaces Roblox's default "Health" script, which regenerates health constantly, even
+-- mid-fight. Out-of-combat regeneration is handled by CombatService on the server instead
+-- (rules in shared-data/combat.json "recovery"). This script intentionally does nothing.
