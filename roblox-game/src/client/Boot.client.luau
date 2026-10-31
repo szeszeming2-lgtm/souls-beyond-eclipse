@@ -1,13 +1,28 @@
 --!strict
--- Phase 0 smoke test. NOT gameplay code.
--- It only proves that the client can read the shared GameData modules.
--- Phase 1 replaces this with the real client bootstrap.
+-- Client entry point: starts every controller and screen in order.
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Controllers = script.Parent:WaitForChild("Controllers")
+local UI = script.Parent:WaitForChild("UI")
 
-local GameData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("GameData")) :: any
+local order: { any } = {
+	require(Controllers:WaitForChild("SettingsController")),
+	require(Controllers:WaitForChild("InputController")),
+	require(Controllers:WaitForChild("Notifications")),
+	require(Controllers:WaitForChild("MovementController")),
+	require(Controllers:WaitForChild("CameraController")),
+	require(Controllers:WaitForChild("FxController")),
+	require(Controllers:WaitForChild("CombatController")),
+	require(UI:WaitForChild("Toasts")),
+	require(UI:WaitForChild("Hud")),
+	require(UI:WaitForChild("Minimap")),
+	require(UI:WaitForChild("EnemyBars")),
+	require(UI:WaitForChild("PauseMenu")),
+	require(UI:WaitForChild("TouchControls")),
+	require(UI:WaitForChild("DevPanel")),
+}
 
-local actionCount = #GameData.InputActions.actions
-assert(actionCount > 0, "input actions should not be empty")
+for _, module in order do
+	module.start()
+end
 
-print(string.format("[SBE] Phase 0 smoke test PASSED on the client: %d input actions loaded.", actionCount))
+print("[SBE] Client started: Phase 1 prototype (placeholder art)")
