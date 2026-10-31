@@ -54,6 +54,7 @@ export class Game {
     this.solids = [];
     this.water = [];
     this.platforms = [];
+    this.surfaces = []; // walkable tops (ground, roads, platforms) for 3D heights
     for (const p of m.blockout) {
       const [x, y, z] = p.position, [sx, sy, sz] = p.size;
       const rect = { x0: x - sx / 2, z0: z - sz / 2, x1: x + sx / 2, z1: z + sz / 2, label: p.label };
@@ -62,10 +63,34 @@ export class Game {
       if (!rotated && grounded && ["building", "wall", "landmark"].includes(p.role) && p.shape !== "cylinder") this.solids.push(rect);
       if (p.role === "water") this.water.push(rect);
       if (p.role === "platform") this.platforms.push(p.shape === "cylinder" ? { cx: x, cz: z, r: sx / 2 } : rect);
+      if (["ground", "road", "platform"].includes(p.role) && !rotated) {
+        this.surfaces.push(p.shape === "cylinder" ? { cx: x, cz: z, r: sx / 2, top: y + sy / 2 } : { ...rect, top: y + sy / 2 });
+      }
     }
     this.spawn = { x: m.player_spawn.position[0], z: m.player_spawn.position[2] };
     this.hub = m.hubs[0];
     this.arena = m.boss_arenas[0];
+  }
+
+  // Height of the walkable surface under a point (used to stand characters on walkways in 3D).
+  groundHeight(x, z) {
+    let top = 0;
+    for (const s of this.surfaces) {
+      const inside = s.r !== undefined ? dist(x, z, s.cx, s.cz) <= s.r : this.inRect(s, x, z);
+      if (inside && s.top > top) top = s.top;
+    }
+    return top;
+  }
+
+  // Camera-relative movement: input x = right, y = forward on screen.
+  worldMove(mv) {
+    const yaw = this.viewYaw || 0, c = Math.cos(yaw), s = Math.sin(yaw);
+    return { x: c * mv.x - s * mv.y, z: -s * mv.x - c * mv.y };
+  }
+
+  cameraForward() {
+    const yaw = this.viewYaw || 0;
+    return { x: -Math.sin(yaw), z: -Math.cos(yaw) };
   }
 
   inRect(r, x, z, pad = 0) { return x > r.x0 - pad && x < r.x1 + pad && z > r.z0 - pad && z < r.z1 + pad; }
@@ -181,17 +206,21 @@ export class Game {
   aimAssist() {
     const p = this.player;
     if (this.lockTarget?.alive) { p.face = unit(this.lockTarget.x - p.x, this.lockTarget.z - p.z); return; }
-    if (this.aimMode === "mouse") return;
+    // Aim where the player is looking (camera, or movement when moving), nudged to the nearest enemy in front.
+    const moving = this.moveDir && Math.hypot(this.moveDir.x, this.moveDir.z) > 0.2;
+    const look = moving ? unit(this.moveDir.x, this.moveDir.z) : this.aimMode === "camera" ? this.cameraForward() : p.face;
     let best = null, bestScore = Infinity;
     for (const e of this.enemies) {
       if (!e.alive) continue;
       const d = dist(p.x, p.z, e.x, e.z);
-      if (d > 14) continue;
+      if (d > 12) continue;
       const dir = unit(e.x - p.x, e.z - p.z);
-      const score = d - (dir.x * p.face.x + dir.z * p.face.z) * 8;
+      const dot = dir.x * look.x + dir.z * look.z;
+      if (dot < 0.35 && d > 4) continue; // only enemies roughly in front (or very close)
+      const score = d - dot * 8;
       if (score < bestScore) { best = dir; bestScore = score; }
     }
-    if (best) p.face = best;
+    p.face = best || look;
   }
 
   enemiesInArea(area, range, ox, oz, fx, fz) {
@@ -312,7 +341,8 @@ export class Game {
       const d = dist(p.x, p.z, e.x, e.z);
       if (d > this.C.lock_on.range_studs) continue;
       const dir = unit(e.x - p.x, e.z - p.z);
-      const score = d - (dir.x * p.face.x + dir.z * p.face.z) * 15;
+      const look = this.cameraForward();
+      const score = d - (dir.x * look.x + dir.z * look.z) * 15;
       if (score < bestScore) { best = e; bestScore = score; }
     }
     this.lockTarget = best;
@@ -730,7 +760,8 @@ export class Game {
       if (t >= p.respawnAt) this.respawn();
     } else {
       const mv = input.moveVector();
-      this.moveDir = { x: mv.x, z: -mv.y };
+      this.moveDir = this.worldMove(mv);
+      const wm = this.moveDir;
       const stunned = t < p.stunnedUntil;
       if (p.queued && t >= p.busyUntil) { const q = p.queued; p.queued = null; this.melee(q); }
       p.sprinting = input.isDown("dodge_sprint") && t - p.dodgeAt > 0.3 && Math.hypot(mv.x, mv.y) > 0.1;
@@ -742,14 +773,16 @@ export class Game {
       const speed = (p.guarding ? M.guard_walk_speed : p.sprinting ? M.sprint_speed : M.walk_speed) * slow;
       if (p.dash && t < p.dash.until) this.move(p, p.dash.vx * dt, p.dash.vz * dt);
       else if (p.knock && t < p.knock.until) this.move(p, p.knock.vx * dt, p.knock.vz * dt);
-      else if (!stunned && t >= p.busyUntil - 0.05) this.move(p, mv.x * speed * dt, -mv.y * speed * dt);
-      else if (!stunned) this.move(p, mv.x * speed * 0.25 * dt, -mv.y * speed * 0.25 * dt);
+      else if (!stunned && t >= p.busyUntil - 0.05) this.move(p, wm.x * speed * dt, wm.z * speed * dt);
+      else if (!stunned) this.move(p, wm.x * speed * 0.25 * dt, wm.z * speed * 0.25 * dt);
 
       // facing
       if (this.lockTarget?.alive) p.face = unit(this.lockTarget.x - p.x, this.lockTarget.z - p.z);
-      else if (this.aimMode === "mouse" && this.aimPoint) p.face = unit(this.aimPoint.x - p.x, this.aimPoint.z - p.z);
-      else if (this.aimMode === "stick" && this.aimStick) p.face = unit(this.aimStick.x, -this.aimStick.y);
-      else if (Math.hypot(mv.x, mv.y) > 0.2 && t >= p.busyUntil) p.face = unit(mv.x, -mv.y);
+      else if (Math.hypot(wm.x, wm.z) > 0.2 && t >= p.busyUntil) {
+        const want = unit(wm.x, wm.z); // turn smoothly toward the movement direction
+        const k = Math.min(1, dt * 14);
+        p.face = unit(p.face.x + (want.x - p.face.x) * k, p.face.z + (want.z - p.face.z) * k);
+      }
       if (this.lockTarget && (!this.lockTarget.alive || dist(p.x, p.z, this.lockTarget.x, this.lockTarget.z) > this.C.lock_on.break_range_studs)) this.lockTarget = null;
 
       // upkeep

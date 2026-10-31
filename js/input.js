@@ -21,7 +21,8 @@ const SHORT = {
   ButtonL1: "LB", ButtonR1: "RB", ButtonL2: "LT", ButtonR2: "RT", ButtonL3: "L3", ButtonR3: "R3",
   ButtonSelect: "View", ButtonStart: "Menu", DPadUp: "D-pad ↑", DPadDown: "D-pad ↓", DPadLeft: "D-pad ←",
   DPadRight: "D-pad →", Thumbstick1: "Left stick", Thumbstick2: "Right stick", "Composite:WASD": "WASD",
-  "Composite:Arrows": "Arrows", "Composite:DPad": "D-pad",
+  "Composite:Arrows": "Arrows", "Composite:DPad": "D-pad", MouseDelta: "Mouse",
+  TouchCameraSwipe: "Swipe (right side)", TouchStickMove: "Stick (left side)",
 };
 
 export function inputLabel(name) {
@@ -52,6 +53,12 @@ export class Input {
     this.rightStick = { x: 0, y: 0 };
     this.touchMove = { x: 0, y: 0 };
     this.mouse = { x: 0, y: 0, active: false };
+    this.look = { x: 0, y: 0 }; // camera turn since last frame (pixels), from mouse or touch
+    this.zoom = 0; // mouse wheel since last frame
+    this.camKeys = new Map(); // arrow keys held for the camera
+    this.canvas = canvas;
+    this.shouldCapture = () => false; // main.js: true while playing (click locks the mouse for camera look)
+    this.lockFailed = false;
     this.padPrev = [];
     this.setPresets([]);
 
@@ -72,6 +79,8 @@ export class Input {
     canvas.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "mouse") return;
       this.setDevice("keyboard_mouse");
+      // The first click captures the mouse for camera look instead of attacking.
+      if (this.shouldCapture() && !this.locked() && !this.lockFailed) { this.capture(); return; }
       this.begin(e.button === 2 ? "MouseButton2" : e.button === 1 ? "MouseButton3" : "MouseButton1", "keyboard_mouse");
     });
     addEventListener("pointerup", (e) => {
@@ -81,7 +90,51 @@ export class Input {
     addEventListener("pointermove", (e) => {
       if (e.pointerType !== "mouse") return;
       this.mouse = { x: e.clientX, y: e.clientY, active: true };
+      // Mouse look while the pointer is locked (or as a fallback when the browser can't lock it).
+      if (this.context === "gameplay" && (this.locked() || (this.lockFailed && this.shouldCapture()))) {
+        this.look.x += e.movementX || 0;
+        this.look.y += e.movementY || 0;
+      }
     });
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (this.context === "gameplay") this.zoom += Math.sign(e.deltaY);
+    }, { passive: false });
+    // Some browsers refuse pointer lock (or refuse it briefly right after Esc). After a few
+    // refusals in a row, fall back to turning the camera with plain mouse movement.
+    this.lockErrors = 0;
+    document.addEventListener("pointerlockerror", () => { if (++this.lockErrors >= 3) this.lockFailed = true; });
+    document.addEventListener("pointerlockchange", () => { if (this.locked()) this.lockErrors = 0; });
+  }
+
+  locked() { return document.pointerLockElement === this.canvas; }
+
+  capture() {
+    try {
+      const r = this.canvas.requestPointerLock?.();
+      if (!this.canvas.requestPointerLock) this.lockFailed = true;
+      r?.catch?.(() => {}); // e.g. asked again too soon after Esc: the next click tries again
+    } catch { this.lockFailed = true; }
+  }
+
+  releaseMouse() { if (this.locked()) document.exitPointerLock?.(); }
+
+  // Camera turn input since the last call: { x, y } in pixels (mouse/touch) and wheel zoom steps.
+  takeLook() {
+    const look = this.look, zoom = this.zoom;
+    this.look = { x: 0, y: 0 };
+    this.zoom = 0;
+    return { x: look.x, y: look.y, zoom };
+  }
+
+  addLook(dx, dy) { this.look.x += dx; this.look.y += dy; }
+
+  // Arrow keys turn the camera: x = right, y = up.
+  cameraKeys() {
+    if (this.context !== "gameplay") return { x: 0, y: 0 };
+    let x = 0, y = 0;
+    for (const [, d] of this.camKeys) { x += d[0]; y += d[1]; }
+    return { x: Math.sign(x), y: Math.sign(y) };
   }
 
   on(kind, fn) { this.listeners[kind].push(fn); }
@@ -102,6 +155,7 @@ export class Input {
   releaseAll() {
     for (const id of [...this.down.keys()]) this.finish(id);
     this.keysHeld.clear();
+    this.camKeys.clear();
     this.touchMove = { x: 0, y: 0 };
   }
 
@@ -116,6 +170,7 @@ export class Input {
 
   begin(name, device) {
     const dir = directionFor(this.map, this.context, device, name);
+    if (dir && dir[0] === "camera") { this.camKeys.set(name, [dir[1], dir[2]]); return; }
     if (dir && (dir[0] === "move" || dir[0] === "menu_navigate")) {
       this.keysHeld.set(name, [dir[1], dir[2]]);
       if (dir[0] === "menu_navigate") this.emit("pressed", "menu_navigate", { x: dir[1], y: dir[2] });
@@ -127,6 +182,7 @@ export class Input {
 
   end(name, device) {
     this.keysHeld.delete(name);
+    this.camKeys.delete(name);
     const id = actionFor(this.map, this.context, device, name);
     if (id) this.finish(id);
   }

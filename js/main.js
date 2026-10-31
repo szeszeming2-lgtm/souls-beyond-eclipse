@@ -3,7 +3,7 @@
 import rawData from "./gamedata.js";
 import { Game } from "./game.js";
 import { Input } from "./input.js";
-import { Renderer } from "./render.js";
+import { Renderer3D } from "./render3d.js";
 import { UI } from "./ui.js";
 import { Touch } from "./touch.js";
 
@@ -19,14 +19,30 @@ const data = deepFreeze(rawData);
 const canvas = document.querySelector("#game");
 const game = new Game(data);
 const input = new Input(data, canvas);
-const renderer = new Renderer(canvas, game);
+let renderer;
+try {
+  renderer = new Renderer3D(canvas, game, document.querySelector("#world-ui"));
+} catch (err) {
+  document.querySelector("#title-buttons").innerHTML =
+    "<p>Your browser couldn't start 3D graphics (WebGL). Try another browser, or turn on hardware acceleration.</p>";
+  throw err;
+}
+window.__sbeReady = true;
 const ui = new UI(game, input, renderer);
 new Touch(input, game);
+
+// Mouse look: clicking the game captures the mouse while playing; Esc frees it and pauses.
+input.shouldCapture = () => game.running && !ui.view && input.device === "keyboard_mouse";
+document.addEventListener("pointerlockchange", () => {
+  if (!input.locked() && game.running && !ui.view) ui.openPause();
+});
 
 // Actions -> game
 const NOT_YET = new Set(["ability_2", "ability_3", "ultimate"]);
 input.on("pressed", (id, dir) => {
   if (ui.view) {
+    // Esc that just freed the mouse (and opened the menu) must not also close it.
+    if ((id === "menu_back" || id === "pause") && performance.now() - ui.openedAt < 300) return;
     if (id === "menu_navigate") ui.navigate(dir);
     else if (id === "menu_confirm") ui.confirm();
     else if (id === "menu_back" || (id === "pause" && ui.view !== "title")) ui.back();
@@ -72,25 +88,35 @@ addEventListener("pagehide", () => { if (game.running) game.persist(); });
 // Dev-only handle for local testing (never on the live site).
 if (["localhost", "127.0.0.1"].includes(location.hostname)) window.__sbe = { game, input, ui, renderer };
 
+// Camera turn speeds (radians per pixel for mouse/touch, radians per second for stick/keys).
+const MOUSE_TURN = 0.0032, TOUCH_TURN = 0.0065, STICK_TURN = 2.8, KEY_TURN = 2.2;
+
+function steerCamera(dt) {
+  const look = input.takeLook();
+  if (!game.running || ui.view) return;
+  const sens = game.setting("camera_sensitivity") ?? 1;
+  const padSens = game.setting("gamepad_sensitivity") ?? 1;
+  const invert = game.setting("invert_camera_y") ? -1 : 1;
+  const k = (input.device === "touch" ? TOUCH_TURN : MOUSE_TURN) * sens;
+  let dx = look.x * k, dy = look.y * k;
+  const rs = input.rightStick, keys = input.cameraKeys();
+  dx += (rs.x * STICK_TURN * padSens + keys.x * KEY_TURN * sens) * dt;
+  dy += (-rs.y * STICK_TURN * 0.6 * padSens - keys.y * KEY_TURN * 0.5 * sens) * dt;
+  if (dx || dy) renderer.rotateCamera(dx, dy * invert);
+  if (look.zoom) renderer.zoomBy(look.zoom * 1.5);
+  renderer.autoFollow = input.device === "touch";
+  // Attacks go where the camera looks (nudged to the nearest enemy); on touch, toward the nearest enemy.
+  game.aimMode = input.device === "touch" ? "move" : "camera";
+}
+
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
   input.pollGamepad();
-  if (game.running && !ui.view) {
-    // aiming: mouse position, else right stick, else movement direction
-    if (input.device === "keyboard_mouse" && input.mouse.active) {
-      game.aimMode = "mouse";
-      game.aimPoint = renderer.toWorld(input.mouse.x, input.mouse.y);
-    } else if (input.device === "gamepad" && Math.hypot(input.rightStick.x, input.rightStick.y) > 0.3) {
-      game.aimMode = "stick";
-      game.aimStick = input.rightStick;
-    } else {
-      game.aimMode = "move";
-    }
-  }
+  steerCamera(dt);
   game.update(dt, input);
-  if (game.running) renderer.draw();
+  if (game.running) renderer.draw(dt);
   ui.updateHud(dt);
   requestAnimationFrame(frame);
 }

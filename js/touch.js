@@ -1,5 +1,6 @@
-// On-screen controls for phones and tablets: a stick that appears where your thumb lands, and
-// large buttons. Layouts: standard, one-handed left, one-handed right. Shown only for touch.
+// On-screen controls for phones and tablets: a stick that appears where your thumb lands,
+// swipe anywhere else to turn the camera, and large buttons. Layouts: standard, one-handed
+// left, one-handed right. Shown only for touch.
 
 const BUTTONS = [
   { action: "light_attack", label: "Attack", size: 112, x: 150, y: 150 },
@@ -19,6 +20,7 @@ export class Touch {
     this.game = game;
     this.root = document.querySelector("#touch");
     this.zone = document.querySelector("#stick-zone");
+    this.camZone = document.querySelector("#cam-zone");
     this.stick = document.querySelector("#stick");
     this.knob = document.querySelector("#stick-knob");
     this.box = document.querySelector("#touch-buttons");
@@ -33,7 +35,7 @@ export class Touch {
       this.stick.style.top = `${e.clientY}px`;
       this.knob.style.transform = "";
       this.stick.classList.remove("hidden");
-      this.zone.setPointerCapture?.(e.pointerId);
+      try { this.zone.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
       input.setTouchMove(0, 0);
     });
     this.zone.addEventListener("pointermove", (e) => {
@@ -52,6 +54,24 @@ export class Touch {
     };
     this.zone.addEventListener("pointerup", end);
     this.zone.addEventListener("pointercancel", end);
+
+    // Camera: one finger swiping outside the stick and buttons turns the view.
+    this.camId = null;
+    this.camZone.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" || this.camId !== null) return;
+      this.camId = e.pointerId;
+      this.camLast = { x: e.clientX, y: e.clientY };
+      try { this.camZone.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
+      input.setDevice("touch");
+    });
+    this.camZone.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== this.camId) return;
+      input.addLook(e.clientX - this.camLast.x, e.clientY - this.camLast.y);
+      this.camLast = { x: e.clientX, y: e.clientY };
+    });
+    const camEnd = (e) => { if (e.pointerId === this.camId) this.camId = null; };
+    this.camZone.addEventListener("pointerup", camEnd);
+    this.camZone.addEventListener("pointercancel", camEnd);
     input.on("device", () => this.refresh());
     game.on("setting", () => this.refresh());
     game.on("started", () => this.refresh());
@@ -67,7 +87,7 @@ export class Touch {
     b.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       pointer = e.pointerId;
-      b.setPointerCapture?.(e.pointerId);
+      try { b.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
       b.classList.add("down");
       this.input.touchPress(spec.action);
     });

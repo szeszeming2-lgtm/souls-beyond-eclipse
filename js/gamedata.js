@@ -4848,7 +4848,8 @@ export default {
     "kind": "axis2d",
     "bindings": {
      "keyboard_mouse": [
-      "MouseDelta"
+      "MouseDelta",
+      "Composite:Arrows"
      ],
      "gamepad": [
       "Thumbstick2"
@@ -5330,7 +5331,7 @@ export default {
    {
     "id": "effects_quality",
     "tab": "graphics",
-    "label": "Effects quality",
+    "label": "Graphics quality",
     "kind": "choice",
     "default": "auto",
     "options": [
@@ -5356,9 +5357,10 @@ export default {
      }
     ],
     "platforms": [
-     "roblox"
+     "roblox",
+     "pc"
     ],
-    "help": "Controls the game's own effects. Overall rendering quality is in Roblox's menu (Esc > Settings)."
+    "help": "Lower it if the game runs slowly. Auto picks a level for your device."
    },
    {
     "id": "camera_sensitivity",

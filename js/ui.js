@@ -2,10 +2,11 @@
 // Menus work with mouse, touch, keyboard (arrows/WASD + Enter, Esc to go back) and gamepad.
 
 import * as Save from "./save.js";
+import { drawMinimap } from "./minimap.js";
 
 // Settings this browser edition cannot act on yet are hidden instead of pretending to work.
-const WEB_UNSUPPORTED = new Set(["camera_sensitivity", "invert_camera_y", "gamepad_sensitivity", "master_volume", "music_volume", "sfx_volume", "subtitles"]);
-const HIDDEN_ACTIONS = new Set(["camera", "jump"]);
+const WEB_UNSUPPORTED = new Set(["master_volume", "music_volume", "sfx_volume", "subtitles"]);
+const HIDDEN_ACTIONS = new Set(["jump"]);
 const COLORS = { good: "#78d28c", accent: "#f2a33a", boss: "#ff6b80", spirit: "#f2c14e", dim: "#aaa8b4", bad: "#ff8a8a" };
 
 const $ = (sel) => document.querySelector(sel);
@@ -67,7 +68,9 @@ export class UI {
     if (!g.running) return;
     this.hudClock += dt;
     this.mapClock += dt;
-    if (this.mapClock > 0.2) { this.mapClock = 0; this.renderer.drawMinimap($("#minimap")); }
+    if (this.mapClock > 0.2) { this.mapClock = 0; drawMinimap($("#minimap"), g, g.viewYaw || 0); }
+    const capture = this.input.device === "keyboard_mouse" && !this.view && !this.input.locked() && !this.input.lockFailed;
+    $("#look-hint").classList.toggle("hidden", !capture);
     if (this.hudClock < 0.1) return;
     this.hudClock = 0;
     const p = g.player, sv = g.save;
@@ -192,6 +195,8 @@ export class UI {
 
   openPanel(view, build) {
     this.view = view;
+    this.openedAt = performance.now();
+    this.input.releaseMouse();
     this.game.paused = true;
     this.input.setContext("menu");
     const panel = $("#panel");
@@ -207,6 +212,8 @@ export class UI {
     $("#overlay").classList.add("hidden");
     this.input.setContext("gameplay");
     this.game.paused = false;
+    // Take the mouse back for camera look (allowed because closing came from a click or key press).
+    if (this.input.device === "keyboard_mouse" && this.game.running && !this.input.lockFailed) this.input.capture();
   }
 
   back() {
@@ -252,9 +259,10 @@ export class UI {
     p.style.maxWidth = "520px";
     p.innerHTML = `
       <p><b>Goal:</b> clear Gloamlings around the harbor, grow stronger, upgrade your sword at the Ferry Terminal, then defeat the <b>Lampeater</b> on the promenade (the red ring on the map).</p>
-      <p><b>Keyboard + mouse:</b> WASD move · aim with the mouse · Left click light attack · Right click heavy · Shift dodge (hold to sprint) · C guard, tap just before a hit to <b>parry</b> · Q Wickflare · Tab lock-on · G upgrade at the hub · Esc menu.</p>
-      <p><b>Gamepad:</b> left stick move · right stick aim · X light · Y heavy · B dodge · LB guard · RB Wickflare · R3 lock-on · Menu button pauses.</p>
-      <p><b>Phone/tablet:</b> drag on the left to move, buttons on the right.</p>
+      <p><b>Keyboard + mouse:</b> click the game to grab the mouse, then move the mouse to look around (arrow keys work too, wheel zooms) · WASD move · Left click light attack · Right click heavy · Shift dodge (hold to sprint) · C guard, tap just before a hit to <b>parry</b> · Q Wickflare · Tab lock-on · G upgrade at the hub · Esc frees the mouse and pauses.</p>
+      <p><b>Gamepad:</b> left stick move · right stick camera · X light · Y heavy · B dodge · LB guard · RB Wickflare · R3 lock-on · Menu button pauses.</p>
+      <p><b>Phone/tablet:</b> drag on the left to move, swipe on the right to turn the camera, buttons on the right.</p>
+      <p>Attacks go where the camera faces and snap to the nearest enemy in front of you. Lock-on keeps the camera on one enemy.</p>
       <p class="dim">Orange markers on the ground show where an attack will land. A red "!" means it can't be blocked: dodge it.</p>`;
     box.append(p);
     box.append(this.button("Back", () => this.showTitle(), "primary"));
@@ -362,7 +370,7 @@ export class UI {
         table.append(tr);
       }
       list.append(table);
-      list.append(el("p", "dim", "Aim follows the mouse (or the right stick). Right-click can switch between heavy attack and guard in Settings > Controls."));
+      list.append(el("p", "dim", "Attacks go where the camera faces. Camera sensitivity and invert Y are in Settings > Controls, where right-click can also switch between heavy attack and guard."));
       panel.append(list);
       const footer = el("div", "footer");
       footer.append(this.button("Back", () => this.openPause(), "primary"));
@@ -397,5 +405,6 @@ export class UI {
       document.documentElement.style.setProperty("--ui-scale", String(base * v));
     }
     if (id === "right_click") { this.input.setPresets(v === "guard" ? ["right_click_guard"] : []); this.refreshHints(); }
+    if (id === "effects_quality") this.renderer.setQuality(v);
   }
 }

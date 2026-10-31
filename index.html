@@ -7,9 +7,11 @@
 <title>Souls Beyond: Eclipse</title>
 <meta name="description" content="An original anime-inspired action RPG prototype you can play in your browser.">
 <link rel="stylesheet" href="css/style.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
 </head>
 <body>
 <canvas id="game"></canvas>
+<div id="world-ui"></div>
 
 <div id="hud" class="hidden">
   <div id="player-panel">
@@ -35,12 +37,14 @@
   <div id="slots"></div>
   <div id="hub-hint" class="hidden"></div>
   <div id="lock-text"></div>
+  <div id="look-hint" class="hidden">Click to look around with the mouse</div>
   <div id="note">Prototype · placeholder art · no sound yet</div>
 </div>
 
 <div id="toasts"></div>
 
 <div id="touch" class="hidden">
+  <div id="cam-zone"></div>
   <div id="stick-zone"></div>
   <div id="stick" class="hidden"><div id="stick-knob"></div></div>
   <div id="touch-buttons"></div>
@@ -59,5 +63,13 @@
 </div>
 
 <script type="module" src="js/main.js"></script>
+<script>
+  // If the 3D engine can't be downloaded, say so instead of showing an empty title screen.
+  setTimeout(function () {
+    if (window.__sbeReady) return;
+    var box = document.getElementById("title-buttons");
+    if (box && !box.children.length) box.innerHTML = "<p>The 3D engine is still loading or couldn't be downloaded. Check your connection, then reload the page.</p>";
+  }, 10000);
+</script>
 </body>
 </html>

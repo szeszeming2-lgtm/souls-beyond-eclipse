@@ -28,6 +28,24 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------------- labels drawn over the 3D world ---------------- */
+#world-ui { position: fixed; inset: 0; pointer-events: none; overflow: hidden; font-size: calc(14px * var(--ui-scale)); }
+.wl { position: absolute; left: 0; top: 0; white-space: nowrap; text-align: center; text-shadow: 0 1px 3px #000, 0 0 2px #000; will-change: transform; }
+.wl.landmark { color: #f6e6c4; font-weight: 700; opacity: 0.85; font-size: 0.95em; }
+.wl.hub { color: var(--accent); font-weight: 700; }
+.wl.ft { color: #aee8ff; font-weight: 700; font-size: 0.9em; }
+.wl.enemy .n { font-size: 0.85em; font-weight: 700; }
+.wl.enemy .n span { color: var(--dim); font-weight: 400; }
+.wl.enemy .b { width: 64px; height: 6px; margin: 3px auto 0; background: #000a; border-radius: 3px; overflow: hidden; }
+.wl.enemy .b i { display: block; height: 100%; background: var(--hp); }
+.wl.unblockable { font-size: 2.6em; font-weight: 900; line-height: 1; }
+.wl.lock { font-size: 2.2em; color: #ffdc96; line-height: 1; }
+.wl.stars { color: #ffd478; font-weight: 700; }
+.wl.num { font-weight: 800; font-size: 1.15em; }
+.wl.num.big { font-size: 1.5em; }
+#vignette { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(130, 0, 0, 0.55) 100%); }
 .hidden { display: none !important; }
 
 /* ---------------- HUD ---------------- */
@@ -70,6 +88,7 @@ canvas#game { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 .slot .timer { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.5em; }
 #hub-hint { position: absolute; bottom: calc(110px * var(--ui-scale)); left: 50%; transform: translateX(-50%); background: var(--panel); padding: 8px 14px; border-radius: 10px; font-size: 0.95em; white-space: nowrap; }
 #lock-text { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); color: #ffdc96; font-size: 0.9em; text-shadow: 0 1px 3px #000; }
+#look-hint { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); background: var(--panel); padding: 8px 14px; border-radius: 10px; font-size: 0.95em; }
 #note { position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: 8px; font-size: 0.72em; color: var(--dim); }
 
 /* ---------------- toasts ---------------- */
@@ -122,6 +141,7 @@ h1 span { display: block; color: var(--accent); font-size: 0.6em; letter-spacing
 
 /* ---------------- touch ---------------- */
 #touch { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+#cam-zone { position: absolute; inset: 0; pointer-events: auto; }
 #stick-zone { position: absolute; left: 0; bottom: 0; width: 45%; height: 70%; pointer-events: auto; }
 #touch.one_handed_right #stick-zone { left: auto; right: 0; width: 50%; height: 26%; }
 #touch.one_handed_left #stick-zone { width: 50%; height: 26%; }
