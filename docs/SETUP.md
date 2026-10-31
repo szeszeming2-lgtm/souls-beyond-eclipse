@@ -1,25 +1,29 @@
 # Setup
 
-What to install, and the exact commands. You are on macOS (Apple silicon).
+What is installed, how to check everything, and how to playtest. You are on macOS (Apple silicon).
 
-## Already installed (nothing to do)
-- **Git** 2.54
-- **Python** 3.14 (all data tools use it; no extra packages needed)
-- **Roblox Studio**, **VS Code**, **Homebrew**
+## Installed
 
-## Install now (for Phase 1)
+| Tool | Version | What it is for |
+|---|---|---|
+| Git | 2.54 | Version history |
+| Python | 3.14 | Data tools (no extra packages needed) |
+| Rokit | 1.2.0 | Installs the pinned Roblox tools below (in `~/.rokit`, added to your PATH by `~/.zshenv`) |
+| Rojo | 7.7.1 | Syncs/builds the project into Roblox Studio (Studio plugin installed too) |
+| Wally | 0.3.2 | Luau packages. Installed: ProfileStore 1.0.3 |
+| Selene | 0.32.0 | Luau linter |
+| StyLua | 2.6.0 | Luau formatter |
+| Lune | 0.10.5 | Runs the game-rules tests outside Roblox |
+| luau-lsp | 1.70.1 | Strict Luau type checker (catches Roblox API typos) |
+| Roblox Studio, VS Code, Homebrew | | Already on your Mac |
 
-### 1. Rokit (installs the Roblox toolchain at pinned versions)
-Open Terminal and run:
+All tool versions are pinned in `rokit.toml`. On a fresh machine, the whole setup is:
 
 ```bash
 curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash
 ```
 
-Close Terminal and open it again so the `rokit` command is found.
-
-### 2. The project's tools (Rojo, Wally, Selene, StyLua, Lune)
-Go to the project folder. The folder name has a space in it, so keep the quotes:
+Then reopen Terminal, go to the project folder (keep the quotes, the name has a space):
 
 ```bash
 cd "/Users/szeming/projects/visition/untitled folder"
@@ -29,53 +33,72 @@ cd "/Users/szeming/projects/visition/untitled folder"
 rokit install
 ```
 
-Rokit asks whether to trust each tool the first time. Answer yes. Then check they work:
-
 ```bash
-rojo --version
+cd roblox-game && wally install && cd ..
 ```
-
-### 3. The Rojo plugin for Roblox Studio
 
 ```bash
 rojo plugin install
 ```
 
-Restart Roblox Studio afterwards.
+VS Code: open the project folder and click **Install All** for the recommended extensions.
 
-### 4. VS Code extensions
-Open the project folder in VS Code. It will offer the recommended extensions (Luau Language
-Server, Rojo, StyLua, Selene). Click **Install All**.
+## Check everything (run before every commit)
 
-### 5. Check everything
 ```bash
 python3 tools/check_all.py
 ```
-The Selene, StyLua and Rojo steps now run instead of showing SKIPPED.
 
-## Playtest in Roblox Studio (two ways)
+It runs 13 steps: data validation, XP targets, generated files, Python tests, Luau tests (Lune),
+lint (Selene), formatting (StyLua), strict type checking (luau-lsp) and a place build (Rojo).
 
-**Live sync (best while developing).** Changes on disk appear in Studio instantly.
-1. In Terminal, from the project folder:
-   ```bash
-   rojo serve roblox-game
-   ```
-   Leave it running.
-2. In Roblox Studio, open a new **Baseplate**.
-3. **Plugins** tab → **Rojo** → **Connect** (it connects to `localhost:34872`).
-4. Press **Play**. Open **View → Output**. In Phase 0 you should see two lines starting with
-   `[SBE] Phase 0 smoke test PASSED`.
+After editing anything in `shared-data/`:
 
-**Build a place file (one-off).**
+```bash
+python3 tools/convert_to_luau.py
+```
+
+To reformat Luau code:
+
+```bash
+stylua roblox-game/src roblox-game/tests
+```
+
+## Playtest in Roblox Studio
+
+**Build a place file (simplest).**
+
 ```bash
 rojo build roblox-game -o builds/SoulsBeyondEclipse.rbxl
 ```
-Then open `builds/SoulsBeyondEclipse.rbxl` in Roblox Studio and press Play.
+
+```bash
+open builds/SoulsBeyondEclipse.rbxl
+```
+
+In Studio press **Play** (F5) and open **View → Output**. Then follow
+[checklists/PHASE1_SMOKE_TEST.md](checklists/PHASE1_SMOKE_TEST.md). After a rebuild, close the
+place in Studio (File → Close Place) and open it again.
+
+**Live sync (best while developing).** Changes on disk appear in Studio immediately.
+
+```bash
+rojo serve roblox-game
+```
+
+Leave it running, open the built place (or any place) in Studio, then **Plugins → Rojo →
+Connect**.
+
+**Phones and tablets:** in Studio, **Test → Device** picks a phone or tablet to emulate, so you
+can try the touch controls.
+
+## Saving in Studio
+Without API access, ProfileStore automatically uses a temporary in-memory store: everything works,
+but progress resets when you stop the test. To test real saving:
+1. **File → Publish to Roblox** (private is fine).
+2. **Game Settings → Security → Enable Studio Access to API Services**.
 
 ## Later
-- **Phase 1 (saving):** saves only work in Studio once the place is published to your Roblox
-  account and **Game Settings → Security → Enable Studio Access to API Services** is on. Phase 1
-  walks through it.
 - **Phase 6:** Godot 4.x, and a Steamworks partner account for the Steam build.
 
 ## Optional: rename the project folder
