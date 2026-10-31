@@ -1,0 +1,108 @@
+-- Stagger and crowd-control limits, cooldowns, rate limiting, hit areas.
+
+local Stagger = loader:require(Shared.Rules.Stagger)
+local Cooldowns = loader:require(Shared.Rules.Cooldowns)
+local RateLimiter = loader:require(Shared.Rules.RateLimiter)
+local Geometry = loader:require(Shared.Rules.Geometry)
+local Data = loader:require(Shared.Data)
+
+local poiseRules = Data.combat.poise
+local ccRules = Data.combat.crowd_control
+
+describe("Stagger (no stun-lock loops)", function()
+	it("staggers when poise runs out", function()
+		local s = Stagger.newPoise(60)
+		expect(Stagger.hit(s, 30, 0, poiseRules)).toBe(false)
+		expect(Stagger.hit(s, 30, 0.1, poiseRules)).toBe(true)
+	end)
+
+	it("cannot stagger again during the immunity window", function()
+		local s = Stagger.newPoise(60)
+		Stagger.hit(s, 100, 0, poiseRules)
+		local immuneFor = poiseRules.stagger_s + poiseRules.stagger_immunity_s
+		expect(Stagger.hit(s, 100, immuneFor - 0.01, poiseRules)).toBe(false)
+		expect(Stagger.hit(s, 100, immuneFor + 0.01, poiseRules)).toBe(true)
+	end)
+
+	it("poise refills after a pause in hits", function()
+		local s = Stagger.newPoise(60)
+		Stagger.hit(s, 50, 0, poiseRules)
+		expect(Stagger.hit(s, 50, poiseRules.poise_regen_delay_s + 0.1, poiseRules)).toBe(false)
+	end)
+
+	it("forced staggers (parry, guard break) respect immunity too", function()
+		local s = Stagger.newPoise(60)
+		expect(Stagger.force(s, 0, 1, poiseRules)).toBe(true)
+		expect(Stagger.force(s, 0.5, 1, poiseRules)).toBe(false)
+	end)
+end)
+
+describe("Crowd control diminishing returns", function()
+	it("each repeat lasts less, then the target is immune", function()
+		local s = Stagger.newCc()
+		expect(Stagger.ccDuration(s, 1.6, 0, ccRules)).toBeNear(1.6)
+		expect(Stagger.ccDuration(s, 1.6, 1, ccRules)).toBeNear(0.8)
+		expect(Stagger.ccDuration(s, 1.6, 2, ccRules)).toBeNear(0.4)
+		expect(Stagger.ccDuration(s, 1.6, 3, ccRules)).toBe(0)
+	end)
+
+	it("no single effect lasts longer than the cap", function()
+		local s = Stagger.newCc()
+		expect(Stagger.ccDuration(s, 99, 0, ccRules)).toBe(ccRules.max_hard_cc_s)
+	end)
+
+	it("the count resets after the window", function()
+		local s = Stagger.newCc()
+		Stagger.ccDuration(s, 1, 0, ccRules)
+		expect(Stagger.ccDuration(s, 1, ccRules.diminishing_window_s + 1, ccRules)).toBeNear(1)
+	end)
+end)
+
+describe("Cooldowns", function()
+	it("tracks ready time", function()
+		local cd = Cooldowns.new()
+		expect(Cooldowns.isReady(cd, "abl_wickflare", 0)).toBe(true)
+		Cooldowns.start(cd, "abl_wickflare", 10, 8)
+		expect(Cooldowns.isReady(cd, "abl_wickflare", 17.9)).toBe(false)
+		expect(Cooldowns.remaining(cd, "abl_wickflare", 14)).toBeNear(4)
+		expect(Cooldowns.isReady(cd, "abl_wickflare", 18)).toBe(true)
+	end)
+end)
+
+describe("RateLimiter", function()
+	it("allows a burst, then refills over time", function()
+		local b = RateLimiter.new(3, 2, 0)
+		expect(RateLimiter.allow(b, 0)).toBe(true)
+		expect(RateLimiter.allow(b, 0)).toBe(true)
+		expect(RateLimiter.allow(b, 0)).toBe(true)
+		expect(RateLimiter.allow(b, 0)).toBe(false)
+		expect(RateLimiter.allow(b, 0.5)).toBe(true)
+		expect(RateLimiter.allow(b, 0.5)).toBe(false)
+	end)
+end)
+
+describe("Hit areas", function()
+	it("cone: in front hits, behind misses", function()
+		expect(Geometry.inCone(0, 0, 0, 1, 0, 5, 6, 90, 1)).toBe(true)
+		expect(Geometry.inCone(0, 0, 0, 1, 0, -5, 6, 90, 1)).toBe(false)
+		expect(Geometry.inCone(0, 0, 0, 1, 0, 8, 6, 90, 1)).toBe(false)
+	end)
+
+	it("line: hits along the path, misses to the side", function()
+		expect(Geometry.inLine(0, 0, 1, 0, 30, 1, 40, 6, 1)).toBe(true)
+		expect(Geometry.inLine(0, 0, 1, 0, 30, 6, 40, 6, 1)).toBe(false)
+		expect(Geometry.inLine(0, 0, 1, 0, -5, 0, 40, 6, 1)).toBe(false)
+	end)
+
+	it("ring: the centre and far outside are safe", function()
+		expect(Geometry.inRing(0, 0, 0, 0, 24, 6, 1)).toBe(false)
+		expect(Geometry.inRing(0, 0, 24, 0, 24, 6, 1)).toBe(true)
+		expect(Geometry.inRing(0, 0, 40, 0, 24, 6, 1)).toBe(false)
+	end)
+
+	it("uses data-defined areas", function()
+		local wickflare = Data.abilities["abl_wickflare"]
+		expect(Geometry.hitsArea(wickflare.area, wickflare.range_studs, 0, 0, 0, 1, 0, 35, 1)).toBe(true)
+		expect(Geometry.hitsArea(wickflare.area, wickflare.range_studs, 0, 0, 0, 1, 10, 10, 1)).toBe(false)
+	end)
+end)
