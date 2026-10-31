@@ -1,3 +1,0 @@
-# Lint settings for the Lune tests. Run from the repo root:
-#   selene --config roblox-game/tests/selene.toml roblox-game/tests
-std = "lune_tests"

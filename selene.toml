@@ -1,2 +1,0 @@
-# Luau linter settings. Run from the repo root: selene roblox-game/src
-std = "roblox"

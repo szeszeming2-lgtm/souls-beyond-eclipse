@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0e1018">
+<title>Souls Beyond: Eclipse</title>
+<meta name="description" content="An original anime-inspired action RPG prototype you can play in your browser.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="player-panel">
+    <div id="level">Lv 1</div>
+    <div class="bar hp"><div class="fill"></div><span></span></div>
+    <div class="bar spirit"><div class="fill"></div><span></span></div>
+    <div class="bar xp"><div class="fill"></div></div>
+    <div id="xp-text"></div>
+    <div id="effects"></div>
+    <div id="marks"></div>
+  </div>
+  <button id="menu-button" class="btn small">Menu</button>
+  <div id="boss" class="hidden">
+    <div id="boss-name"></div>
+    <div class="bar boss-bar"><div class="fill"></div><span></span></div>
+    <div id="boss-phase"></div>
+  </div>
+  <div id="map-box">
+    <div id="map-name"></div>
+    <canvas id="minimap" width="200" height="200"></canvas>
+    <div id="objective"></div>
+  </div>
+  <div id="slots"></div>
+  <div id="hub-hint" class="hidden"></div>
+  <div id="lock-text"></div>
+  <div id="note">Prototype · placeholder art · no sound yet</div>
+</div>
+
+<div id="toasts"></div>
+
+<div id="touch" class="hidden">
+  <div id="stick-zone"></div>
+  <div id="stick" class="hidden"><div id="stick-knob"></div></div>
+  <div id="touch-buttons"></div>
+</div>
+
+<div id="overlay" class="hidden"><div id="panel"></div></div>
+
+<div id="title" class="screen">
+  <div class="title-box">
+    <div class="eyebrow">An original action RPG</div>
+    <h1>Souls Beyond<span>Eclipse</span></h1>
+    <p class="tagline">At 12:07 the sun went black over Akeboshi City. Everyone slept, except you.<br>Your shadow moves on its own now. The Gloam is hunting the light.</p>
+    <div id="title-buttons"></div>
+    <p class="small-print">Web prototype · placeholder art · progress saves in this browser</p>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

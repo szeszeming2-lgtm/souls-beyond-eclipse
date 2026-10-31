@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rule tests</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; background: #0e1018; color: #f0ece4; padding: 20px; }
+  .pass { color: #78d28c; } .fail { color: #ff7a7a; } h1 { font-size: 20px; }
+</style>
+</head>
+<body>
+<h1>Souls Beyond: Eclipse · rule tests</h1>
+<div id="summary">Running…</div>
+<ul id="out"></ul>
+<script type="module">
+import data from "./js/gamedata.js";
+import * as R from "./js/rules.js";
+import * as Save from "./js/save.js";
+
+const results = [];
+const test = (name, fn) => { try { fn(); results.push([true, name]); } catch (e) { results.push([false, `${name}: ${e.message}`]); } };
+const eq = (a, b) => { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`); };
+const ok = (v, msg = "expected true") => { if (!v) throw new Error(msg); };
+
+const XP = data.xpToNext, P = data.progression, C = data.combat;
+const cap = R.effectiveCap(P.content_level_cap, XP);
+const start = { level: 1, xp: 0, total_xp: 0 };
+
+test("XP table covers levels 1 to 3000", () => eq(XP.length, 2999));
+test("levels up exactly at the table's XP", () => { const r = R.addXp(start, XP[0], XP, cap); eq(r.progress.level, 2); eq(r.progress.xp, 0); });
+test("never passes the build cap (50)", () => { const r = R.addXp(start, 1e12, XP, cap); eq(r.progress.level, 50); eq(r.progress.xp, 0); });
+test("can never exceed level 3000", () => eq(R.addXp(start, 2 ** 52, XP, R.effectiveCap(5000, XP)).progress.level, 3000));
+test("ignores negative and invalid XP", () => { for (const v of [-5, NaN, Infinity, 0]) eq(R.addXp(start, v, XP, cap).added, 0); });
+test("level-up rewards are granted only once", () => { eq(R.pendingRewardLevels(1, 4), [2, 3, 4]); eq(R.pendingRewardLevels(4, 4), []); });
+test("milestones every 50 levels, major ones named", () => { ok(R.milestoneAt(50, P.milestones)); eq(R.milestoneAt(49, P.milestones), null); eq(R.milestoneAt(100, P.milestones).name, "Kindled"); });
+test("damage with no defense is attack x power", () => eq(R.damage({ attack: 100, power: 2, defense: 0, attackerLevel: 1, targetLevel: 1, growth: 0.05 }, C.damage), 200));
+test("guard reduces damage by its fraction", () => eq(R.damage({ attack: 100, power: 1, defense: 0, attackerLevel: 1, targetLevel: 1, growth: 0.05, guardReduction: 0.75 }, C.damage), 25));
+test("damage never below the minimum", () => eq(R.damage({ attack: 0, power: 1, defense: 0, attackerLevel: 1, targetLevel: 1, growth: 0.05 }, C.damage), C.damage.min_damage));
+test("defense works the same at every level", () => { const a = R.mitigation(25, 1, C.damage, 0.05), b = R.mitigation(R.statAt(25, 2000, 0.05), 2000, C.damage, 0.05); ok(Math.abs(a - b) < 1e-9); });
+test("stagger immunity stops stun-locks", () => { const s = R.newPoise(60); ok(R.poiseHit(s, 100, 0, C.poise)); ok(!R.poiseHit(s, 100, 1, C.poise)); });
+test("crowd control shrinks then becomes immune", () => { const s = R.newCc(); const d = [0, 1, 2, 3].map((t) => R.ccDuration(s, 1.6, t, C.crowd_control)); eq(d.map((x) => Math.round(x * 10) / 10), [1.6, 0.8, 0.4, 0]); });
+test("ring attacks are safe in the centre", () => { ok(!R.inRing(0, 0, 0, 0, 24, 6, 1)); ok(R.inRing(0, 0, 24, 0, 24, 6, 1)); });
+test("cone attacks miss behind the attacker", () => { ok(R.inCone(0, 0, 0, 1, 0, 5, 6, 90, 1)); ok(!R.inCone(0, 0, 0, 1, 0, -5, 6, 90, 1)); });
+test("every enemy attack tell is readable on every difficulty", () => {
+  for (const e of data.enemies) for (const a of e.attacks) for (const m of data.difficulty.modes) {
+    const w = a.timing.windup_s * m.telegraph_time_mult;
+    ok(w >= C.readability.min_telegraph_s - 1e-9, `${e.id}/${a.id} on ${m.id}: ${w}`);
+    if (!a.avoidable_by.includes("guard")) ok(a.avoidable_by.includes("dodge") && w >= C.readability.min_unblockable_telegraph_s - 1e-9, `${a.id} unblockable`);
+  }
+});
+test("boss phases change at 60% and 25%", () => { const ph = data.enemies.find((e) => e.id === "enm_lampeater").boss.phases; eq([1, 0.61, 0.6, 0.1].map((f) => R.phaseIndexFor(ph, f)), [0, 0, 1, 2]); });
+test("anti-grind slows XP from farming one enemy", () => { const s = {}; for (let i = 0; i < 20; i++) R.grindMultiplier(s, "x", i, P.anti_grind); ok(R.grindMultiplier(s, "x", 21, P.anti_grind) < 1); });
+test("pause on the web is Esc", () => { const m = R.buildInputMap(data.inputActions, "pc", []); eq(R.actionFor(m, "gameplay", "keyboard_mouse", "Escape"), "pause"); });
+test("right-click preset swaps guard and heavy", () => { const m = R.buildInputMap(data.inputActions, "pc", ["right_click_guard"]); eq(R.actionFor(m, "gameplay", "keyboard_mouse", "MouseButton2"), "guard"); });
+test("settings: sliders clamp and snap, bad values reset", () => { const d = data.settings.settings.find((s) => s.id === "camera_shake"); eq(R.coerceSetting(d, 5), [true, 1]); eq(R.sanitizeSettings({ difficulty: "nightmare" }, data.settings.settings, "pc").difficulty, "normal"); });
+test("a new save is valid", () => ok(Save.isValid(Save.defaultSave(), XP, cap)));
+test("a damaged save field is repaired, the rest kept", () => { const s = { ...Save.defaultSave(), level: 7, marks: "lots" }; const r = Save.repair(s, XP, cap); eq(r.data.level, 7); eq(r.data.marks, 0); eq(r.repaired, ["marks"]); });
+test("a save from a newer version is refused, not overwritten", () => eq(Save.repair({ ...Save.defaultSave(), version: 99 }, XP, cap).refused, "newer_version"));
+test("invalid data is never written", () => ok(!Save.isValid({ ...Save.defaultSave(), level: -3 }, XP, cap)));
+
+const passed = results.filter(([p]) => p).length;
+document.querySelector("#summary").innerHTML = `<b class="${passed === results.length ? "pass" : "fail"}">${passed} passed, ${results.length - passed} failed</b>`;
+for (const [p, name] of results) { const li = document.createElement("li"); li.className = p ? "pass" : "fail"; li.textContent = (p ? "PASS  " : "FAIL  ") + name; document.querySelector("#out").append(li); }
+</script>
+</body>
+</html>
