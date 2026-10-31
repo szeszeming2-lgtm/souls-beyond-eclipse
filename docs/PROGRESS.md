@@ -1,6 +1,44 @@
 # Progress
 
-Last updated: 2026-10-30. **Phase 0 is complete and waiting for your approval.**
+Last updated: 2026-10-30. **Phase 1 code is complete and passes every automated check. The Studio playtest is still pending.**
+
+## Phase 1: Roblox playable prototype (in progress: playtest pending)
+
+### What exists (built, not yet seen running)
+- Server: ProfileStore saving (validated before every save; refuses newer-version saves), settings,
+  server-only XP with level-sync, catch-up, anti-grind and rate guards, level cap 50 for this build,
+  starter weapon, placeholder character and katana, server-authoritative combat (light/heavy chains,
+  Flash Step, guard/parry, Wickflare), Gloamling spawns and AI with readable tells and attack tokens,
+  the Lampeater boss (3 phases, checkpoints, optional assists), the harbor blockout, Studio-only dev tools.
+- Client: one input system for keyboard/mouse, gamepad and touch; camera with lock-on; HUD with XP to
+  next level, effects, cooldowns, boss bar and minimap; pause menu with data-driven settings; touch stick
+  and buttons with three layouts.
+
+### Tests (all ran and passed)
+- `python3 tools/check_all.py`: 13 of 13 steps pass. 104 Python tests and 90 Lune tests pass.
+  Selene and StyLua are clean, strict luau-lsp type checking reports 0 errors, and the place builds.
+- Covered by tests: XP and level cap (cannot exceed 3000, or 50 in this build), level-up rewards granted
+  once, damage math, equip rules, inventory, save load/repair/corruption/newer-version refusal,
+  server rejection of client-claimed XP or rewards, and the Studio-only dev-tools gate.
+
+### Not verified yet
+- **Nothing has been run inside Roblox Studio yet.** Movement feel, camera, the visuals, enemy behaviour,
+  the boss fight, menus and touch controls are written and type-checked, but not seen working.
+- Real DataStore saving across sessions needs the place published with Studio API access turned on.
+
+### Placeholders
+- All art is placeholder: a blocky body, a parts-built katana and enemies, neon-part effects, grey-box map.
+- No sound or music. No custom animations: attacks show an arc flash only.
+
+### Known limits
+- Heavy-attack charging, ability upgrades, Cinder Rush, Eclipse Form, interact, fast travel and full
+  key remapping are not in this build. Those buttons say "not in this build yet".
+- The pause menu cannot stop a shared Roblox server. While it is open, enemies don't start new attacks on you.
+
+### Exact next step
+Playtest in Studio with `docs/checklists/PHASE1_SMOKE_TEST.md`, fix whatever it finds, then the Phase 1
+report and approval.
+
 
 ## Phase 0: Plan
 
@@ -109,4 +147,5 @@ data, movement and camera, and the unified input system.
 
 | Phase | Status | Date |
 |---|---|---|
-| 0: Plan | Complete, awaiting approval | 2026-10-30 |
+| 0: Plan | Complete, approved | 2026-10-30 |
+| 1: Roblox prototype | Code complete, Studio playtest pending | 2026-10-30 |
