@@ -1,0 +1,10 @@
+[package]
+name = "sbe/souls-beyond-eclipse"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+private = true
+
+# Server-only packages land in roblox-game/ServerPackages (never sent to clients).
+[server-dependencies]
+ProfileStore = "lm-loleris/profilestore@1.0.3" # DataStore saving with session locking (Apache-2.0)
